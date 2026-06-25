@@ -55,6 +55,14 @@ interface Recos {
   list: Producto[];
 }
 
+const SLUG_LABEL: Record<string, string> = {
+  projector: "Proyectores",
+  "security-cam": "Cámaras",
+  smartwatch: "Smartwatch",
+  speaker: "Parlantes",
+};
+const SLUG_ORDER = ["projector", "smartwatch", "security-cam", "speaker"];
+
 export default function App() {
   const { catalogo, universales, loading, error } = usePandaData();
   const [screen, setScreen] = useState<Screen>("home");
@@ -78,6 +86,24 @@ export default function App() {
     setEmpujon(false);
     setScreen("ficha");
   };
+
+  const activeCats = useMemo(() => {
+    const slugsConStock = new Set(
+      catalogo
+        .filter((p) => p.disponible && p.categorySlug)
+        .map((p) => p.categorySlug!.toLowerCase()),
+    );
+    return SLUG_ORDER.filter((s) => slugsConStock.has(s))
+      .concat(Array.from(slugsConStock).filter((s) => !SLUG_ORDER.includes(s)))
+      .map((slug) => ({ slug, label: SLUG_LABEL[slug] ?? slug }));
+  }, [catalogo]);
+
+  // Si la categoría activa queda sin stock, cambiar a la primera disponible.
+  useEffect(() => {
+    if (activeCats.length > 0 && !activeCats.find((c) => c.slug === cat)) {
+      setCat(activeCats[0].slug);
+    }
+  }, [activeCats, cat]);
 
   const filtered = useMemo(
     () =>
@@ -122,12 +148,7 @@ export default function App() {
               <img src="/Logo Panda Store.png" alt="PandaStore" className="h-8 w-auto" />
             </div>
             <div className="flex gap-1.5 ml-2">
-              {([
-                { label: "Proyectores", slug: "projector" },
-                { label: "Smartwatch", slug: "smartwatch" },
-                { label: "Cámaras", slug: "security-cam" },
-                { label: "Parlantes", slug: "speaker" },
-              ] as { label: string; slug: string }[]).map(({ label, slug }) => (
+              {activeCats.map(({ label, slug }) => (
                 <button
                   key={slug}
                   onClick={() => { setCat(slug); setQuery(""); setScreen("catalog"); }}
