@@ -528,8 +528,8 @@ function Ficha({
               </span>
             )}
           </p>
-          {/* Imagen: altura fija para que los bullets quepan sin scroll. */}
-          <div className="w-full h-44 rounded-xl bg-gradient-to-br from-stone-100 to-stone-200 overflow-hidden flex items-center justify-center text-stone-400 text-sm my-3">
+          {/* Imagen cuadrada reducida para que los bullets quepan sin scroll. */}
+          <div className="aspect-square w-44 mx-auto rounded-xl bg-gradient-to-br from-stone-100 to-stone-200 overflow-hidden flex items-center justify-center text-stone-400 text-sm my-3">
             {foto ? (
               <img src={foto} alt={p.name} className="w-full h-full object-cover" />
             ) : (
