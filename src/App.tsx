@@ -118,7 +118,7 @@ export default function App() {
               {([
                 { label: "Proyectores", slug: "projector" },
                 { label: "Smartwatch", slug: "smartwatch" },
-                { label: "Cámaras", slug: "security cam" },
+                { label: "Cámaras", slug: "security-cam" },
                 { label: "Parlantes", slug: "speaker" },
               ] as { label: string; slug: string }[]).map(({ label, slug }) => (
                 <button
