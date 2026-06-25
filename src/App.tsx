@@ -123,7 +123,7 @@ export default function App() {
               ] as { label: string; slug: string }[]).map(({ label, slug }) => (
                 <button
                   key={slug}
-                  onClick={() => { setCat(slug); setQuery(""); }}
+                  onClick={() => { setCat(slug); setQuery(""); setScreen("catalog"); }}
                   className={`text-xs font-bold px-3 py-1.5 rounded-full transition-colors ${
                     cat === slug
                       ? "bg-zinc-900 text-white"
