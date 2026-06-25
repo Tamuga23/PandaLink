@@ -528,8 +528,8 @@ function Ficha({
               </span>
             )}
           </p>
-          {/* Imagen grande CUADRADA (igual que la portada). */}
-          <div className="aspect-square w-full rounded-xl bg-gradient-to-br from-stone-100 to-stone-200 overflow-hidden flex items-center justify-center text-stone-400 text-sm my-4">
+          {/* Imagen: altura fija para que los bullets quepan sin scroll. */}
+          <div className="w-full h-44 rounded-xl bg-gradient-to-br from-stone-100 to-stone-200 overflow-hidden flex items-center justify-center text-stone-400 text-sm my-3">
             {foto ? (
               <img src={foto} alt={p.name} className="w-full h-full object-cover" />
             ) : (
