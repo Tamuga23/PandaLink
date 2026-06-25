@@ -62,6 +62,7 @@ export default function App() {
   const [drawer, setDrawer] = useState<Objecion | null>(null);
   const [demo, setDemo] = useState(false);
   const [query, setQuery] = useState("");
+  const [cat, setCat] = useState("projector");
   const [recos, setRecos] = useState<Recos | null>(null);
   const [empujon, setEmpujon] = useState(false);
 
@@ -74,11 +75,11 @@ export default function App() {
   const filtered = useMemo(
     () =>
       catalogo
-        .filter((p) => p.categorySlug?.toLowerCase() === "projector")
+        .filter((p) => p.categorySlug?.toLowerCase() === cat)
         .filter((p) =>
           (p.name || "").toLowerCase().includes(query.toLowerCase()),
         ),
-    [catalogo, query],
+    [catalogo, cat, query],
   );
 
   const recommend = (luz: string) => {
@@ -114,16 +115,23 @@ export default function App() {
               <img src="/Logo Panda Store.png" alt="PandaStore" className="h-8 w-auto" />
             </div>
             <div className="flex gap-1.5 ml-2">
-              <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-zinc-900 text-white">
-                Proyectores
-              </span>
-              {["Smartwatch", "Cámaras", "Parlantes"].map((c) => (
-                <span
-                  key={c}
-                  className="text-xs px-3 py-1.5 rounded-full bg-stone-100 text-stone-400"
+              {([
+                { label: "Proyectores", slug: "projector" },
+                { label: "Smartwatch", slug: "smartwatch" },
+                { label: "Cámaras", slug: "camera" },
+                { label: "Parlantes", slug: "speaker" },
+              ] as { label: string; slug: string }[]).map(({ label, slug }) => (
+                <button
+                  key={slug}
+                  onClick={() => { setCat(slug); setQuery(""); }}
+                  className={`text-xs font-bold px-3 py-1.5 rounded-full transition-colors ${
+                    cat === slug
+                      ? "bg-zinc-900 text-white"
+                      : "bg-stone-100 text-stone-400 hover:bg-stone-200"
+                  }`}
                 >
-                  {c}
-                </span>
+                  {label}
+                </button>
               ))}
             </div>
             <div className="ml-auto text-xs bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-lg font-medium">
