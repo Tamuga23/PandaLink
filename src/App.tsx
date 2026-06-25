@@ -212,8 +212,8 @@ export default function App() {
                 {screen === "recos" && recos && (
                   <div>
                     <BackBtn onClick={() => setScreen("home")} />
-                    <h2 className="text-2xl font-bold text-zinc-900 mb-1">Recomendación</h2>
-                    <p className="text-stone-500 mb-5">
+                    <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-1">Recomendación</h2>
+                    <p className="text-stone-500 dark:text-zinc-400 mb-5">
                       {recos.luz === "luz"
                         ? "El lugar tiene luz: solo modelos brillantes (≥900 ANSI), para evitar una devolución."
                         : "Cuarto que se oscurece: excelente imagen sin pagar de más por brillo que no necesita."}
@@ -284,7 +284,7 @@ export default function App() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-start justify-between gap-4">
-                  <h3 className="text-lg font-bold text-zinc-900">{drawer.pregunta}</h3>
+                  <h3 className="text-lg font-bold text-zinc-900 dark:text-white">{drawer.pregunta}</h3>
                   <button
                     onClick={() => setDrawer(null)}
                     className="shrink-0 border border-stone-200 dark:border-zinc-600 dark:text-zinc-300 rounded-lg px-3 py-1.5 text-sm"
@@ -323,7 +323,7 @@ function ErrorState({ msg }: { msg: string }) {
   return (
     <div className="h-full flex flex-col items-center justify-center text-center px-8 gap-3">
       <WifiOff size={36} className="text-red-500" />
-      <h3 className="text-lg font-bold text-zinc-900">No se pudo cargar</h3>
+      <h3 className="text-lg font-bold text-zinc-900 dark:text-white">No se pudo cargar</h3>
       <p className="text-sm text-stone-500 max-w-md">{msg}</p>
     </div>
   );
@@ -333,7 +333,7 @@ function VacioState() {
   return (
     <div className="h-full flex flex-col items-center justify-center text-center px-8 gap-3">
       <PackageX size={36} className="text-stone-400" />
-      <h3 className="text-lg font-bold text-zinc-900">Catálogo vacío</h3>
+      <h3 className="text-lg font-bold text-zinc-900 dark:text-white">Catálogo vacío</h3>
       <p className="text-sm text-stone-500 max-w-md">
         La colección <code className="bg-stone-100 px-1 rounded">catalogo_publico</code> no
         tiene productos todavía.
@@ -345,8 +345,8 @@ function VacioState() {
 function Home({ onCatalog, onGuided }: { onCatalog: () => void; onGuided: () => void }) {
   return (
     <div>
-      <h2 className="text-2xl font-bold text-zinc-900 mb-1">¿Cómo llega el cliente?</h2>
-      <p className="text-stone-500 mb-6">Los dos caminos terminan en la misma ficha de cierre.</p>
+      <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-1">¿Cómo llega el cliente?</h2>
+      <p className="text-stone-500 dark:text-zinc-400 mb-6">Los dos caminos terminan en la misma ficha de cierre.</p>
       <div className="grid grid-cols-2 gap-5">
         <Choice
           icon={<Search size={28} />}
@@ -385,10 +385,10 @@ function Choice({
       onClick={onClick}
       className="text-left bg-white dark:bg-zinc-800 border border-stone-200 dark:border-zinc-700 rounded-2xl p-6 hover:border-zinc-900 dark:hover:border-zinc-400 hover:shadow-lg transition-all min-h-[200px] flex flex-col"
     >
-      <div className="text-zinc-900">{icon}</div>
-      <h3 className="text-lg font-bold text-zinc-900 mt-3 mb-1">{title}</h3>
-      <p className="text-stone-500 text-sm flex-1">{desc}</p>
-      <div className="text-sm font-bold text-zinc-900 mt-3 flex items-center gap-1">
+      <div className="text-zinc-900 dark:text-zinc-100">{icon}</div>
+      <h3 className="text-lg font-bold text-zinc-900 dark:text-white mt-3 mb-1">{title}</h3>
+      <p className="text-stone-500 dark:text-zinc-400 text-sm flex-1">{desc}</p>
+      <div className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mt-3 flex items-center gap-1">
         {cta} <ChevronRight size={16} />
       </div>
     </button>
@@ -412,10 +412,10 @@ function Guided({
     <div>
       <BackBtn onClick={onBack} />
       <p className="text-xs text-stone-400 mb-2">Asistente · paso {step} de 2</p>
-      <h2 className="text-2xl font-bold text-zinc-900 mb-1">
+      <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-1">
         {titulo || "¿Para qué lo va a usar?"}
       </h2>
-      <p className="text-stone-500 mb-5">
+      <p className="text-stone-500 dark:text-zinc-400 mb-5">
         {sub || "Esto define la pregunta clave del siguiente paso."}
       </p>
       <div className="grid grid-cols-2 gap-4">{children}</div>
@@ -439,8 +439,8 @@ function Opt({
       onClick={onClick}
       className="text-left bg-white dark:bg-zinc-800 border border-stone-200 dark:border-zinc-700 rounded-xl p-5 hover:border-zinc-900 dark:hover:border-zinc-400 hover:bg-stone-50 dark:hover:bg-zinc-700 transition-all"
     >
-      <div className="text-zinc-900 mb-2">{icon}</div>
-      <div className="font-semibold text-zinc-900">{title}</div>
+      <div className="text-zinc-900 dark:text-zinc-100 mb-2">{icon}</div>
+      <div className="font-semibold text-zinc-900 dark:text-zinc-100">{title}</div>
       <div className="text-stone-500 text-sm mt-0.5">{sub}</div>
     </button>
   );
@@ -461,12 +461,12 @@ function PCard({ p, onClick }: { p: Producto; onClick: () => void }) {
           <span className="px-2 text-center">{p.name}</span>
         )}
       </div>
-      <div className="font-semibold text-sm text-zinc-900">{p.name}</div>
-      <div className="font-bold text-zinc-900">
+      <div className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">{p.name}</div>
+      <div className="font-bold text-zinc-900 dark:text-white">
         {p.precio?.actual != null ? (
           cordobas(p.precio.actual)
         ) : (
-          <span className="text-stone-400 font-normal text-xs">Sin precio</span>
+          <span className="text-stone-400 dark:text-zinc-500 font-normal text-xs">Sin precio</span>
         )}
       </div>
       <div className="mt-1.5 flex items-center gap-2">
@@ -536,7 +536,7 @@ function Ficha({
       <div className="grid grid-cols-2 gap-6">
         {/* Izquierda */}
         <div>
-          <h2 className="text-2xl font-bold text-zinc-900">{p.name}</h2>
+          <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">{p.name}</h2>
           <p className="text-stone-500 mt-1 flex items-center gap-2">
             {p.beneficio}
             {p.disponible ? (
@@ -675,7 +675,7 @@ function Ficha({
             )}
             <div className="flex justify-between items-baseline py-1.5">
               <span className="text-sm text-stone-600">Precio {hasDisc ? "con tarjeta" : "firme"}</span>
-              <span className="text-lg font-bold text-zinc-900">{cordobas(act)}</span>
+              <span className="text-lg font-bold text-zinc-900 dark:text-white">{cordobas(act)}</span>
             </div>
             {hasDisc ? (
               <div className="mt-2">
