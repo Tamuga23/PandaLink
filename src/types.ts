@@ -32,6 +32,8 @@ export interface Precio {
 export interface Media {
   fotos?: string[];
   videos?: string[];
+  heroImage?: string;
+  videoUrl?: string;
 }
 
 export interface Producto {

@@ -423,7 +423,7 @@ function Opt({
 }
 
 function PCard({ p, onClick }: { p: Producto; onClick: () => void }) {
-  const foto = p.media?.fotos?.[0];
+  const foto = p.media?.heroImage ?? p.media?.fotos?.[0];
   return (
     <button
       onClick={onClick}
@@ -494,7 +494,7 @@ function Ficha({
   const [dist, setDist] = useState(2.5);
   const [size, setSize] = useState(100);
 
-  const foto = p.media?.fotos?.[0];
+  const foto = p.media?.heroImage ?? p.media?.fotos?.[0];
   const tr = toNum(p.specs?.throwRatio);
   const dmin = toNum(p.specs?.distMinEnfoque);
   const pulg = Number.isNaN(tr) ? null : Math.round((dist / tr) * K);
@@ -686,8 +686,24 @@ function Ficha({
   );
 }
 
+// Convierte URLs de YouTube (youtu.be/ID o ?v=ID) a URL de embed para iframe.
+function toYouTubeEmbed(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (u.hostname === "youtu.be") return `https://www.youtube.com/embed${u.pathname}`;
+    if (u.hostname.includes("youtube.com")) {
+      const v = u.searchParams.get("v");
+      if (v) return `https://www.youtube.com/embed/${v}`;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 function Demo({ p, onClose }: { p: Producto; onClose: () => void }) {
-  const foto = p.media?.fotos?.[0];
+  const foto = p.media?.heroImage ?? p.media?.fotos?.[0];
+  const embedUrl = p.media?.videoUrl ? toYouTubeEmbed(p.media.videoUrl) : null;
   return (
     <div className="absolute inset-0 bg-zinc-950 text-white flex flex-col">
       <div className="flex items-center gap-3 px-5 py-3 border-b border-zinc-800">
@@ -703,8 +719,18 @@ function Demo({ p, onClose }: { p: Producto; onClose: () => void }) {
       </div>
       <div className="flex-1 overflow-auto p-6">
         <div className="grid grid-cols-3 gap-3 mb-5" style={{ height: "260px" }}>
-          <div className="col-span-2 bg-black border border-zinc-800 rounded-xl flex items-center justify-center text-zinc-500">
-            ▶ Video real del proyector
+          <div className="col-span-2 bg-black border border-zinc-800 rounded-xl overflow-hidden flex items-center justify-center text-zinc-500">
+            {embedUrl ? (
+              <iframe
+                src={embedUrl}
+                className="w-full h-full"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                title={`Video ${p.name}`}
+              />
+            ) : (
+              "▶ Video real del proyector"
+            )}
           </div>
           <div className="grid grid-rows-2 gap-3">
             <div className="bg-black border border-zinc-800 rounded-xl overflow-hidden flex items-center justify-center text-zinc-500 text-xs p-2 text-center">
