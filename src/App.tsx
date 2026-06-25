@@ -225,7 +225,7 @@ export default function App() {
                         Sin resultados{query ? ` para "${query}"` : ""}.
                       </p>
                     ) : (
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-4 gap-3">
                         {filtered.map((p) => (
                           <PCard key={p.id} p={p} onClick={() => openFicha(p)} />
                         ))}
