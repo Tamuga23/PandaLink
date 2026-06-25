@@ -110,11 +110,8 @@ export default function App() {
         >
           {/* Top bar */}
           <div className="flex items-center gap-4 px-5 py-3 bg-white border-b border-stone-200">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">🐼</span>
-              <span className="font-extrabold tracking-wide text-zinc-900">
-                PANDA <span className="font-normal text-stone-400 text-sm">asesor</span>
-              </span>
+            <div className="flex items-center">
+              <img src="/Logo Panda Store.png" alt="PandaStore" className="h-8 w-auto" />
             </div>
             <div className="flex gap-1.5 ml-2">
               <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-zinc-900 text-white">
