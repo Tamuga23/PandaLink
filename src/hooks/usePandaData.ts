@@ -137,11 +137,12 @@ export function usePandaData(): PandaData {
             const items = snap.docs.map((d) =>
               normalizarProducto({ ...d.data(), id: d.id }),
             );
-            items.sort(
-              (a, b) =>
-                (a.precio?.actual ?? Number.POSITIVE_INFINITY) -
-                (b.precio?.actual ?? Number.POSITIVE_INFINITY),
-            );
+            items.sort((a, b) => {
+              const avail = (b.disponible ? 1 : 0) - (a.disponible ? 1 : 0);
+              if (avail !== 0) return avail;
+              return (a.precio?.actual ?? Number.POSITIVE_INFINITY) -
+                (b.precio?.actual ?? Number.POSITIVE_INFINITY);
+            });
             setCatalogo(items);
             setCatReady(true);
           },
