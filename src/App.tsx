@@ -74,7 +74,7 @@ export default function App() {
   const filtered = useMemo(
     () =>
       catalogo
-        .filter((p) => p.categorySlug?.toLowerCase() === "proyectores")
+        .filter((p) => p.categorySlug?.toLowerCase() === "projector")
         .filter((p) =>
           (p.name || "").toLowerCase().includes(query.toLowerCase()),
         ),
