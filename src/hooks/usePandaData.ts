@@ -23,30 +23,42 @@ function normalizarProducto(raw: Record<string, unknown>): Producto {
   // nombre: description → name
   if (!p.name && p.description) p.name = p.description;
 
-  // disponibilidad: activo → disponible
-  if (p.disponible === undefined && p.activo !== undefined) p.disponible = p.activo;
+  // disponibilidad: activo o publicar → disponible
+  if (p.disponible === undefined) {
+    if (p.activo !== undefined) p.disponible = p.activo;
+    else if (p.publicar !== undefined) p.disponible = p.publicar;
+  }
 
   // categoría: category → categorySlug
   if (!p.categorySlug && p.category) p.categorySlug = p.category;
 
-  // precio: cost (número suelto) → precio.actual
-  if (!p.precio && p.cost != null) p.precio = { actual: p.cost };
-
-  // media: imageBase64 en raíz → media.heroImage (si aún no hay heroImage)
-  if (p.imageBase64) {
-    const m = (p.media as Record<string, unknown>) ?? {};
-    if (!m.heroImage) p.media = { ...m, heroImage: p.imageBase64 as string };
+  // precio: varios schemas posibles
+  // Schema A: { cost } → { actual: cost }
+  // Schema B: { price, precioPromo, descEfectivoPct, campania }
+  if (!p.precio) {
+    if (p.precioPromo != null || p.price != null || p.cost != null) {
+      const actual = (p.precioPromo ?? p.cost) as number | undefined;
+      const regular = (p.price ?? actual) as number | undefined;
+      const descPct = p.descEfectivoPct as number | undefined;
+      const efectivo =
+        actual != null && descPct != null
+          ? actual * (1 - descPct / 100)
+          : undefined;
+      p.precio = {
+        ...(regular != null && { regular }),
+        ...(actual != null && { actual }),
+        ...(efectivo != null && { efectivo }),
+        ...(descPct != null && { descEfectivoPct: descPct }),
+        ...(p.campania ? { campania: p.campania as string } : {}),
+      };
+    }
   }
 
-  // bullets: normalizar text → texto (mantener etiqueta si existe)
-  if (Array.isArray(p.bullets)) {
-    p.bullets = (p.bullets as Record<string, unknown>[]).map((b) => ({
-      ...b,
-      texto: b.texto ?? b.text,
-    }));
-  }
+  // specs: specsProyector (schema PandaStore) → specs
+  if (!p.specs && p.specsProyector != null && typeof p.specsProyector === "object")
+    p.specs = p.specsProyector;
 
-  // specs: campos sueltos en raíz → specs (sin pisar campos que ya existan)
+  // specs: campos sueltos en raíz → specs (sin pisar lo que ya existe)
   const rootSpecMap: Record<string, string> = {
     ansi: "ansi",
     throwRatio: "throwRatio",
@@ -62,6 +74,31 @@ function normalizarProducto(raw: Record<string, unknown>): Producto {
     const fromRoot: Record<string, unknown> = {};
     for (const [src, dest] of rootSpecEntries) fromRoot[dest] = p[src];
     p.specs = { ...fromRoot, ...existing };
+  }
+
+  // media: imageBase64 en raíz → media.heroImage (si aún no hay heroImage)
+  if (p.imageBase64) {
+    const m = (p.media as Record<string, unknown>) ?? {};
+    if (!m.heroImage) p.media = { ...m, heroImage: p.imageBase64 as string };
+  }
+
+  // bullets: normalizar text → texto
+  if (Array.isArray(p.bullets)) {
+    p.bullets = (p.bullets as Record<string, unknown>[]).map((b) => ({
+      ...b,
+      texto: b.texto ?? b.text,
+    }));
+  }
+
+  // objecionesOverride: objId → id y pregunta (schema PandaStore)
+  if (Array.isArray(p.objecionesOverride)) {
+    p.objecionesOverride = (p.objecionesOverride as Record<string, unknown>[]).map(
+      (o) => ({
+        ...o,
+        id: o.id ?? o.objId,
+        pregunta: o.pregunta ?? o.objId,
+      }),
+    );
   }
 
   return p as unknown as Producto;
