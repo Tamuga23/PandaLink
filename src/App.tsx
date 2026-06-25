@@ -714,56 +714,75 @@ function Demo({ p, onClose }: { p: Producto; onClose: () => void }) {
   const embedUrl = p.media?.videoUrl ? toYouTubeEmbed(p.media.videoUrl) : null;
   return (
     <div className="absolute inset-0 bg-zinc-950 text-white flex flex-col">
-      <div className="flex items-center gap-3 px-5 py-3 border-b border-zinc-800">
+      {/* Navbar */}
+      <div className="flex items-center gap-3 px-5 py-3 border-b border-zinc-800 shrink-0">
         <img src="/Logo Panda Store.png" alt="PandaStore" className="h-8 w-auto" />
         <button
           onClick={onClose}
-          className="ml-auto text-xs bg-zinc-800 border border-zinc-700 text-zinc-300 rounded-lg px-3 py-1.5"
+          className="ml-auto text-xs bg-zinc-800 border border-zinc-700 text-zinc-300 rounded-lg px-3 py-1.5 hover:bg-zinc-700"
         >
           ↩ Salir del modo demo
         </button>
       </div>
-      <div className="flex-1 overflow-auto p-6">
-        <div className="grid grid-cols-3 gap-3 mb-5" style={{ height: "260px" }}>
-          <div className="col-span-2 bg-black border border-zinc-800 rounded-xl overflow-hidden flex items-center justify-center text-zinc-500">
-            {embedUrl ? (
-              <iframe
-                src={embedUrl}
-                className="w-full h-full"
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-                title={`Video ${p.name}`}
-              />
-            ) : (
-              "▶ Video real del proyector"
+
+      {/* Body: video izquierda, info derecha */}
+      <div className="flex-1 flex gap-4 p-5 min-h-0">
+
+        {/* Video / imagen principal */}
+        <div className="flex-1 bg-black rounded-2xl overflow-hidden flex items-center justify-center text-zinc-600">
+          {embedUrl ? (
+            <iframe
+              src={embedUrl}
+              className="w-full h-full"
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+              title={`Video ${p.name}`}
+            />
+          ) : foto ? (
+            <img src={foto} alt={p.name} className="w-full h-full object-contain" />
+          ) : (
+            <span className="text-sm">Sin media cargada</span>
+          )}
+        </div>
+
+        {/* Panel derecho */}
+        <div className="w-72 flex flex-col gap-4 shrink-0">
+          {/* Foto del producto */}
+          {foto && (
+            <div className="aspect-square w-full rounded-2xl bg-white overflow-hidden shrink-0">
+              <img src={foto} alt={p.name} className="w-full h-full object-contain" />
+            </div>
+          )}
+
+          {/* Info */}
+          <div className="flex flex-col gap-3 overflow-auto">
+            <div>
+              <h2 className="text-xl font-extrabold leading-tight">{p.name}</h2>
+              <p className="text-zinc-400 text-sm mt-1">{p.beneficio}</p>
+            </div>
+
+            {/* Bullets */}
+            {(p.bullets ?? []).length > 0 && (
+              <ul className="space-y-2">
+                {(p.bullets ?? []).slice(0, 4).map((b: Bullet, i: number) => (
+                  <li key={i} className="flex gap-2 text-sm">
+                    <span className="text-emerald-400 shrink-0">✔</span>
+                    <span className="text-zinc-300">{b.texto}</span>
+                  </li>
+                ))}
+              </ul>
             )}
-          </div>
-          <div className="grid grid-rows-2 gap-3">
-            <div className="bg-black border border-zinc-800 rounded-xl overflow-hidden flex items-center justify-center text-zinc-500 text-xs p-2 text-center">
-              {foto ? (
-                <img src={foto} alt={p.name} className="w-full h-full object-cover" />
-              ) : (
-                "Foto HD"
-              )}
-            </div>
-            <div className="bg-black border border-zinc-800 rounded-xl flex items-center justify-center text-zinc-500 text-xs p-2 text-center">
-              "¿Se ve con luz?" (lado a lado)
+
+            {/* Precio */}
+            <div className="mt-auto pt-3 border-t border-zinc-800">
+              <div className="text-2xl font-extrabold text-white">
+                {cordobas(p.precio?.actual)}
+              </div>
+              <div className="text-xs text-zinc-500 mt-0.5">
+                factura · garantía 3 meses · entrega inmediata
+              </div>
             </div>
           </div>
-        </div>
-        <h2 className="text-3xl font-extrabold">{p.name}</h2>
-        <p className="text-zinc-400 mt-1 mb-5">{p.beneficio}</p>
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-          <h4 className="text-amber-300 font-bold">🍿 Combo Mundialista disponible</h4>
-          <p className="text-zinc-400 text-sm mt-1">
-            Proyector + máquina de palomitas Dash Fresh Pop
-          </p>
-        </div>
-        <div className="text-3xl font-extrabold mt-5">
-          {cordobas(p.precio?.actual)}{" "}
-          <span className="text-sm text-zinc-400 font-normal">
-            · factura y garantía 3 meses · entrega inmediata
-          </span>
         </div>
       </div>
     </div>
