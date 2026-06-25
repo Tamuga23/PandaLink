@@ -707,9 +707,7 @@ function Demo({ p, onClose }: { p: Producto; onClose: () => void }) {
   return (
     <div className="absolute inset-0 bg-zinc-950 text-white flex flex-col">
       <div className="flex items-center gap-3 px-5 py-3 border-b border-zinc-800">
-        <span className="font-extrabold tracking-wide">
-          PANDA <span className="font-normal text-zinc-500 text-sm">Store &amp; Co.</span>
-        </span>
+        <img src="/Logo Panda Store.png" alt="PandaStore" className="h-8 w-auto" />
         <button
           onClick={onClose}
           className="ml-auto text-xs bg-zinc-800 border border-zinc-700 text-zinc-300 rounded-lg px-3 py-1.5"
