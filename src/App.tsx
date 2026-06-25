@@ -34,8 +34,9 @@ const toNum = (v: unknown): number => {
   return NaN;
 };
 
+const USD_TO_NIO = 36.6243;
 const cordobas = (n: number | null | undefined): string =>
-  "C$" + Number(n ?? 0).toLocaleString("es-NI", { maximumFractionDigits: 2 });
+  "C$" + Number((n ?? 0) * USD_TO_NIO).toLocaleString("es-NI", { maximumFractionDigits: 2 });
 
 const K = 45.17; // constante 16:9 validada contra ficha del fabricante
 
