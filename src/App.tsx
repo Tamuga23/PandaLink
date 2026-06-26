@@ -134,6 +134,7 @@ export default function App() {
   }, [catalogo, sel]);
 
   const vacio = !loading && !error && catalogo.length === 0;
+  const hoy = new Date().toLocaleDateString("es-NI", { weekday: "short", day: "numeric", month: "short" });
 
   return (
     <div className={`min-h-screen bg-stone-100 dark:bg-zinc-950 flex items-center justify-center p-3 font-sans${dark ? " dark" : ""}`}>
@@ -163,6 +164,7 @@ export default function App() {
               ))}
             </div>
             <div className="ml-auto flex items-center gap-2">
+              <span className="text-xs text-stone-500 dark:text-zinc-400 font-medium capitalize">{hoy}</span>
               <div className="text-xs bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-lg font-medium">
                 🎯 Mundial 2026
               </div>
