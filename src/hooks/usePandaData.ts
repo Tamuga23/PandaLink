@@ -140,8 +140,7 @@ export function usePandaData(): PandaData {
             items.sort((a, b) => {
               const avail = (b.disponible ? 1 : 0) - (a.disponible ? 1 : 0);
               if (avail !== 0) return avail;
-              return (a.precio?.actual ?? Number.POSITIVE_INFINITY) -
-                (b.precio?.actual ?? Number.POSITIVE_INFINITY);
+              return (b.precio?.actual ?? 0) - (a.precio?.actual ?? 0);
             });
             setCatalogo(items);
             setCatReady(true);
