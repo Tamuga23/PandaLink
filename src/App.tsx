@@ -137,14 +137,9 @@ export default function App() {
   const hoy = new Date().toLocaleDateString("es-NI", { weekday: "short", day: "numeric", month: "short" });
 
   return (
-    <div className={`min-h-screen bg-stone-100 dark:bg-zinc-950 flex items-center justify-center p-3 font-sans${dark ? " dark" : ""}`}>
-      <div className="w-full max-w-5xl bg-zinc-900 rounded-3xl p-3 shadow-2xl">
-        <div
-          className="relative bg-stone-50 dark:bg-zinc-900 rounded-2xl overflow-hidden"
-          style={{ height: "740px" }}
-        >
+    <div className={`min-h-screen bg-stone-50 dark:bg-zinc-900 flex flex-col font-sans${dark ? " dark" : ""}`}>
           {/* Top bar */}
-          <div className="flex items-center gap-4 px-5 py-3 bg-white dark:bg-zinc-800 border-b border-stone-200 dark:border-zinc-700">
+          <div className="sticky top-0 z-10 flex items-center gap-4 px-5 py-3 bg-white dark:bg-zinc-800 border-b border-stone-200 dark:border-zinc-700">
             <div className="flex items-center">
               <img src="/Logo Panda Store.png" alt="PandaStore" className="h-8 w-auto" />
             </div>
@@ -179,7 +174,7 @@ export default function App() {
           </div>
 
           {/* Body */}
-          <div className="overflow-auto px-6 py-6 dark:text-zinc-100" style={{ height: "672px" }}>
+          <div className="flex-1 overflow-auto px-6 py-6 dark:text-zinc-100">
             {loading && <Cargando />}
             {!loading && error && <ErrorState msg={error} />}
             {vacio && <VacioState />}
@@ -299,7 +294,7 @@ export default function App() {
           {/* Drawer objeciones */}
           {drawer && (
             <div
-              className="absolute inset-0 bg-black/40 flex items-end"
+              className="fixed inset-0 z-20 bg-black/40 flex items-end"
               onClick={() => setDrawer(null)}
             >
               <div
@@ -327,8 +322,6 @@ export default function App() {
 
           {/* Modo demo */}
           {demo && sel && <Demo p={sel} onClose={() => setDemo(false)} />}
-        </div>
-      </div>
     </div>
   );
 }
@@ -752,7 +745,7 @@ function Demo({ p, onClose }: { p: Producto; onClose: () => void }) {
   const foto = p.media?.heroImage ?? p.media?.fotos?.[0];
   const embedUrl = p.media?.videoUrl ? toYouTubeEmbed(p.media.videoUrl) : null;
   return (
-    <div className="absolute inset-0 bg-zinc-950 text-white flex flex-col">
+    <div className="fixed inset-0 z-30 bg-zinc-950 text-white flex flex-col">
       {/* Navbar */}
       <div className="flex items-center gap-3 px-5 py-3 border-b border-zinc-800 shrink-0">
         <img src="/Logo Panda Store.png" alt="PandaStore" className="h-8 w-auto" />
