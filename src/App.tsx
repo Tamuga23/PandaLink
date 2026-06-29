@@ -69,7 +69,11 @@ export default function App() {
   const [sel, setSel] = useState<Producto | null>(null);
   const [drawer, setDrawer] = useState<Objecion | null>(null);
   const [demo, setDemo] = useState(false);
-  const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
+  const [dark, setDark] = useState(() => {
+    const saved = localStorage.getItem("theme") === "dark";
+    if (saved) document.documentElement.classList.add("dark");
+    return saved;
+  });
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState("projector");
 
@@ -77,6 +81,7 @@ export default function App() {
     const next = !dark;
     setDark(next);
     localStorage.setItem("theme", next ? "dark" : "light");
+    document.documentElement.classList.toggle("dark", next);
   };
   const [recos, setRecos] = useState<Recos | null>(null);
   const [empujon, setEmpujon] = useState(false);
@@ -137,7 +142,7 @@ export default function App() {
   const hoy = new Date().toLocaleDateString("es-NI", { weekday: "short", day: "numeric", month: "short" });
 
   return (
-    <div className={`min-h-screen bg-stone-50 dark:bg-zinc-900 flex flex-col font-sans${dark ? " dark" : ""}`}>
+    <div className="min-h-screen bg-stone-50 dark:bg-zinc-900 flex flex-col font-sans">
           {/* Top bar */}
           <div className="sticky top-0 z-10 flex items-center gap-4 px-5 py-3 bg-white dark:bg-zinc-800 border-b border-stone-200 dark:border-zinc-700">
             <button onClick={() => setScreen("home")} className="flex items-center">
