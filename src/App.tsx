@@ -140,9 +140,9 @@ export default function App() {
     <div className={`min-h-screen bg-stone-50 dark:bg-zinc-900 flex flex-col font-sans${dark ? " dark" : ""}`}>
           {/* Top bar */}
           <div className="sticky top-0 z-10 flex items-center gap-4 px-5 py-3 bg-white dark:bg-zinc-800 border-b border-stone-200 dark:border-zinc-700">
-            <div className="flex items-center">
+            <button onClick={() => setScreen("home")} className="flex items-center">
               <img src="/Logo Panda Store.png" alt="PandaStore" className="h-8 w-auto" />
-            </div>
+            </button>
             <div className="flex gap-1.5 ml-2">
               {activeCats.map(({ label, slug }) => (
                 <button
