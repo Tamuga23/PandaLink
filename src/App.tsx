@@ -326,7 +326,7 @@ export default function App() {
           )}
 
           {/* Modo demo */}
-          {demo && sel && <Demo p={sel} onClose={() => setDemo(false)} />}
+          {demo && sel && <Demo p={sel} onClose={() => setDemo(false)} onHome={() => { setDemo(false); setScreen("home"); }} />}
     </div>
   );
 }
@@ -746,14 +746,16 @@ function toYouTubeEmbed(url: string): string | null {
   }
 }
 
-function Demo({ p, onClose }: { p: Producto; onClose: () => void }) {
+function Demo({ p, onClose, onHome }: { p: Producto; onClose: () => void; onHome: () => void }) {
   const foto = p.media?.heroImage ?? p.media?.fotos?.[0];
   const embedUrl = p.media?.videoUrl ? toYouTubeEmbed(p.media.videoUrl) : null;
   return (
     <div className="fixed inset-0 z-30 bg-zinc-950 text-white flex flex-col">
       {/* Navbar */}
       <div className="flex items-center gap-3 px-5 py-3 border-b border-zinc-800 shrink-0">
-        <img src="/Logo Panda Store.png" alt="PandaStore" className="h-8 w-auto" />
+        <button onClick={onHome} className="flex items-center">
+          <img src="/Logo Panda Store.png" alt="PandaStore" className="h-8 w-auto" />
+        </button>
         <button
           onClick={onClose}
           className="ml-auto text-xs bg-zinc-800 border border-zinc-700 text-zinc-300 rounded-lg px-3 py-1.5 hover:bg-zinc-700"
