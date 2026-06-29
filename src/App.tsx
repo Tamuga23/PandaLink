@@ -70,9 +70,10 @@ export default function App() {
   const [drawer, setDrawer] = useState<Objecion | null>(null);
   const [demo, setDemo] = useState(false);
   const [dark, setDark] = useState(() => {
-    const saved = localStorage.getItem("theme") === "dark";
-    if (saved) document.documentElement.classList.add("dark");
-    return saved;
+    const saved = localStorage.getItem("theme");
+    const isDark = saved !== "light"; // dark por defecto
+    if (isDark) document.documentElement.classList.add("dark");
+    return isDark;
   });
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState("projector");
@@ -144,7 +145,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-zinc-900 flex flex-col font-sans">
           {/* Top bar */}
-          <div className="sticky top-0 z-10 flex items-center gap-4 px-5 py-3 bg-white dark:bg-zinc-800 border-b border-stone-200 dark:border-zinc-700">
+          <div className="sticky top-0 z-10 flex items-center gap-4 px-5 py-3 bg-white dark:bg-zinc-900 border-b border-stone-200 dark:border-zinc-800 shadow-sm dark:shadow-zinc-950">
             <button onClick={() => setScreen("home")} className="flex items-center">
               <img src="/Logo Panda Store.png" alt="PandaStore" className="h-8 w-auto" />
             </button>
@@ -155,7 +156,7 @@ export default function App() {
                   onClick={() => { setCat(slug); setQuery(""); setScreen("catalog"); }}
                   className={`text-xs font-bold px-3 py-1.5 rounded-full transition-colors ${
                     cat === slug
-                      ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+                      ? "bg-cyan-500 text-white shadow-sm"
                       : "bg-stone-100 dark:bg-zinc-700 text-stone-400 dark:text-zinc-300 hover:bg-stone-200 dark:hover:bg-zinc-600"
                   }`}
                 >
@@ -483,7 +484,7 @@ function PCard({ p, onClick }: { p: Producto; onClick: () => void }) {
         )}
       </div>
       <div className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">{p.name}</div>
-      <div className="font-bold text-zinc-900 dark:text-white">
+      <div className="font-bold text-cyan-600 dark:text-cyan-400">
         {p.precio?.actual != null ? (
           cordobas(p.precio.actual)
         ) : (
@@ -584,7 +585,7 @@ function Ficha({
           <ul className="space-y-2">
             {(p.bullets || []).map((b: Bullet, i: number) => (
               <li key={i} className="flex gap-2 text-sm">
-                <span className="text-emerald-600">✔</span>
+                <span className="text-cyan-500">✔</span>
                 <span>
                   <span className="block text-[10px] uppercase tracking-wide text-stone-400 font-semibold">
                     {b.etiqueta}
@@ -596,7 +597,7 @@ function Ficha({
           </ul>
           <button
             onClick={onDemo}
-            className="mt-5 w-full border-2 border-dashed border-stone-300 dark:border-zinc-600 rounded-xl py-3 font-bold text-zinc-800 dark:text-zinc-200 hover:bg-stone-50 dark:hover:bg-zinc-800 flex items-center justify-center gap-2"
+            className="mt-5 w-full border-2 border-dashed border-cyan-500/50 dark:border-cyan-500/40 rounded-xl py-3 font-bold text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-500/10 flex items-center justify-center gap-2 transition-colors"
           >
             <Tv size={18} /> Mostrar al cliente (girar tablet)
           </button>
@@ -696,14 +697,14 @@ function Ficha({
             )}
             <div className="flex justify-between items-baseline py-1.5">
               <span className="text-sm text-stone-600">Precio {hasDisc ? "con tarjeta" : "firme"}</span>
-              <span className="text-lg font-bold text-zinc-900 dark:text-white">{cordobas(act)}</span>
+              <span className="text-lg font-bold text-cyan-600 dark:text-cyan-400">{cordobas(act)}</span>
             </div>
             {hasDisc ? (
               <div className="mt-2">
                 {!empujon ? (
                   <button
                     onClick={() => setEmpujon(true)}
-                    className="w-full bg-zinc-900 text-white rounded-lg py-3 font-bold flex items-center justify-center gap-2"
+                    className="w-full bg-cyan-500 hover:bg-cyan-400 text-white rounded-lg py-3 font-bold flex items-center justify-center gap-2 transition-colors"
                   >
                     <Sparkles size={16} /> Empujón final — efectivo / transferencia
                   </button>
@@ -805,7 +806,7 @@ function Demo({ p, onClose, onHome }: { p: Producto; onClose: () => void; onHome
               <ul className="space-y-2">
                 {(p.bullets ?? []).slice(0, 4).map((b: Bullet, i: number) => (
                   <li key={i} className="flex gap-2 text-sm">
-                    <span className="text-emerald-400 shrink-0">✔</span>
+                    <span className="text-cyan-400 shrink-0">✔</span>
                     <span className="text-zinc-300">{b.texto}</span>
                   </li>
                 ))}
@@ -814,7 +815,7 @@ function Demo({ p, onClose, onHome }: { p: Producto; onClose: () => void; onHome
 
             {/* Precio */}
             <div className="mt-auto pt-3 border-t border-zinc-800">
-              <div className="text-2xl font-extrabold text-white">
+              <div className="text-2xl font-extrabold text-cyan-400">
                 {cordobas(p.precio?.actual)}
               </div>
               <div className="text-xs text-zinc-500 mt-0.5">
