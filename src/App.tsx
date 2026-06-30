@@ -40,12 +40,24 @@ const cordobas = (n: number | null | undefined): string =>
 
 const K = 45.17; // constante 16:9 validada contra ficha del fabricante
 
-// Mezcla universal + override por modelo (override gana).
-function objecionesDe(producto: Producto, universales: Objecion[]): Objecion[] {
-  const map = new Map<string, Objecion>(
-    universales.map((o): [string, Objecion] => [o.id, o]),
+// Cascada de tres capas: universales < categoría < override del modelo.
+// El más específico gana ante igual id.
+function objecionesDe(
+  producto: Producto,
+  universales: Objecion[],
+  porCategoria: Objecion[],
+): Objecion[] {
+  const map = new Map<string, Objecion>();
+  // 1. Universales
+  universales.forEach((o) => map.set(o.id, o));
+  // 2. De la categoría del producto
+  porCategoria
+    .filter((o) => o.categorySlug === producto.categorySlug)
+    .forEach((o) => map.set(o.id, o));
+  // 3. Override del modelo (más específico)
+  (producto.objecionesOverride || []).forEach((o) =>
+    map.set(o.id, { orden: 99, ...o }),
   );
-  (producto.objecionesOverride || []).forEach((o) => map.set(o.id, o));
   return Array.from(map.values()).sort((a, b) => (a.orden ?? 99) - (b.orden ?? 99));
 }
 
@@ -64,7 +76,7 @@ const SLUG_LABEL: Record<string, string> = {
 const SLUG_ORDER = ["projector", "smartwatch", "security-cam", "speaker"];
 
 export default function App() {
-  const { catalogo, universales, loading, error } = usePandaData();
+  const { catalogo, universales, porCategoria, loading, error } = usePandaData();
   const [screen, setScreen] = useState<Screen>("home");
   const [sel, setSel] = useState<Producto | null>(null);
   const [drawer, setDrawer] = useState<Objecion | null>(null);
@@ -285,7 +297,7 @@ export default function App() {
                 {screen === "ficha" && sel && (
                   <Ficha
                     p={sel}
-                    objeciones={objecionesDe(sel, universales)}
+                    objeciones={objecionesDe(sel, universales, porCategoria)}
                     onBack={() => setScreen("catalog")}
                     onObj={(o) => setDrawer(o)}
                     onDemo={() => setDemo(true)}
@@ -624,7 +636,9 @@ function Ficha({
             </div>
           )}
 
-          {/* Calculadora */}
+          {/* Calculadora — solo proyectores */}
+          {p.categorySlug?.toLowerCase() === "projector" && (
+          <>
           <p className="text-[11px] uppercase tracking-wide text-stone-400 font-bold mt-5 mb-2">
             Calculadora de distancia
           </p>
@@ -683,6 +697,8 @@ function Ficha({
               )}
             </div>
           </div>
+          </>
+          )}
 
           {/* Precio y cierre */}
           <p className="text-[11px] uppercase tracking-wide text-stone-400 font-bold mt-5 mb-2">

@@ -11,6 +11,7 @@ export interface Objecion {
   pregunta: string;
   respuesta: string;
   orden?: number;
+  categorySlug?: string;
 }
 
 export interface Specs {

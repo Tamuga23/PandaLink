@@ -1,18 +1,14 @@
 import { useEffect, useState } from "react";
 import { collection, onSnapshot } from "@firebase/firestore";
-import type { DocumentData, QuerySnapshot } from "@firebase/firestore";
 import { db, ensureAnonAuth } from "../lib/firebase";
 import type { Objecion, Producto } from "../types";
 
 export interface PandaData {
   catalogo: Producto[];
   universales: Objecion[];
+  porCategoria: Objecion[];
   loading: boolean;
   error: string | null;
-}
-
-function mapDocs<T>(snap: QuerySnapshot<DocumentData>): T[] {
-  return snap.docs.map((d) => ({ ...d.data(), id: d.id })) as T[];
 }
 
 // Normaliza campos alternativos del admin de PandaStore al schema que usa PandaLink.
@@ -112,25 +108,48 @@ function traducirError(e: unknown): string {
   return "No se pudo conectar con Firebase. " + msg;
 }
 
-// Suscripciones en vivo (onSnapshot) a catalogo_publico y objeciones_universales.
+// objeciones_universales llega con titulo (no pregunta) y order (no orden).
+function normalizarUniversal(raw: Record<string, unknown>): Objecion {
+  return {
+    id: raw.id as string,
+    pregunta: (raw.titulo ?? raw.pregunta ?? "") as string,
+    respuesta: (raw.respuesta ?? "") as string,
+    orden: (raw.order ?? raw.orden) as number | undefined,
+  };
+}
+
+// objeciones_categoria ya tiene pregunta y orden, solo propagamos categorySlug.
+function normalizarCategoria(raw: Record<string, unknown>): Objecion {
+  return {
+    id: raw.id as string,
+    categorySlug: (raw.categorySlug ?? "") as string,
+    pregunta: (raw.pregunta ?? "") as string,
+    respuesta: (raw.respuesta ?? "") as string,
+    orden: raw.orden as number | undefined,
+  };
+}
+
+// Suscripciones en vivo (onSnapshot) a tres colecciones de Firestore.
 export function usePandaData(): PandaData {
   const [catalogo, setCatalogo] = useState<Producto[]>([]);
   const [universales, setUniversales] = useState<Objecion[]>([]);
+  const [porCategoria, setPorCategoria] = useState<Objecion[]>([]);
   const [catReady, setCatReady] = useState(false);
-  const [objReady, setObjReady] = useState(false);
+  const [uniReady, setUniReady] = useState(false);
+  const [catObjReady, setCatObjReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
     let unsubCat: () => void = () => {};
-    let unsubObj: () => void = () => {};
+    let unsubUni: () => void = () => {};
+    let unsubCatObj: () => void = () => {};
 
     ensureAnonAuth()
       .then(() => {
         if (!active) return;
 
         // Catálogo: traemos TODO y mostramos el estado (Disponible / Agotado).
-        // Orden estable por precio asc; los que no tengan precio quedan al final.
         unsubCat = onSnapshot(
           collection(db, "catalogo_publico"),
           (snap) => {
@@ -145,40 +164,55 @@ export function usePandaData(): PandaData {
             setCatalogo(items);
             setCatReady(true);
           },
-          (e) => {
-            setError(traducirError(e));
-            setCatReady(true);
-          },
+          (e) => { setError(traducirError(e)); setCatReady(true); },
         );
 
-        // Objeciones universales: ordenadas por "orden" en el cliente, así no
-        // se pierden documentos que no tengan ese campo cargado.
-        unsubObj = onSnapshot(
+        // Universales: campos titulo→pregunta, order→orden.
+        unsubUni = onSnapshot(
           collection(db, "objeciones_universales"),
           (snap) => {
-            const items = mapDocs<Objecion>(snap);
-            items.sort((a, b) => (a.orden ?? 99) - (b.orden ?? 99));
+            const items = snap.docs
+              .map((d) => normalizarUniversal({ ...d.data(), id: d.id }))
+              .sort((a, b) => (a.orden ?? 99) - (b.orden ?? 99));
             setUniversales(items);
-            setObjReady(true);
+            setUniReady(true);
           },
-          (e) => {
-            setError(traducirError(e));
-            setObjReady(true);
+          (e) => { setError(traducirError(e)); setUniReady(true); },
+        );
+
+        // Por categoría: traemos TODO y filtramos en cliente (evita índice compuesto).
+        unsubCatObj = onSnapshot(
+          collection(db, "objeciones_categoria"),
+          (snap) => {
+            const items = snap.docs.map((d) =>
+              normalizarCategoria({ ...d.data(), id: d.id }),
+            );
+            setPorCategoria(items);
+            setCatObjReady(true);
           },
+          (e) => { setError(traducirError(e)); setCatObjReady(true); },
         );
       })
       .catch((e) => {
         setError(traducirError(e));
         setCatReady(true);
-        setObjReady(true);
+        setUniReady(true);
+        setCatObjReady(true);
       });
 
     return () => {
       active = false;
       unsubCat();
-      unsubObj();
+      unsubUni();
+      unsubCatObj();
     };
   }, []);
 
-  return { catalogo, universales, loading: !(catReady && objReady), error };
+  return {
+    catalogo,
+    universales,
+    porCategoria,
+    loading: !(catReady && uniReady && catObjReady),
+    error,
+  };
 }
