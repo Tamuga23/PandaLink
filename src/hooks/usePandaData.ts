@@ -28,6 +28,10 @@ function normalizarProducto(raw: Record<string, unknown>): Producto {
   // categoría: category → categorySlug
   if (!p.categorySlug && p.category) p.categorySlug = p.category;
 
+  // normalizar slugs en español → inglés (POS guarda 'proyector', app filtra por 'projector')
+  const SLUG_MAP: Record<string, string> = { proyector: 'projector', camara: 'security-cam', parlante: 'speaker' };
+  if (p.categorySlug && SLUG_MAP[p.categorySlug as string]) p.categorySlug = SLUG_MAP[p.categorySlug as string];
+
   // precio: varios schemas posibles
   // Schema A: { cost } → { actual: cost }
   // Schema B: { price, precioPromo, descEfectivoPct, campania }
