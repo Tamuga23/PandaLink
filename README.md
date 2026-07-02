@@ -1,7 +1,9 @@
 # PandaLink — Panda Asesor
 
 PWA independiente de **solo lectura** (asistente de ventas en tablet) para Panda Store.
-Lee `catalogo_publico` y `objeciones_universales` desde Firestore en vivo (`onSnapshot`).
+Lee `catalogo_publico`, `objeciones_universales` y `objeciones_categoria` desde
+Firestore en vivo (`onSnapshot`). Solo el catálogo bloquea la app si falla;
+las objeciones degradan en silencio.
 No mezcla código con ningún otro proyecto.
 
 ## Stack
@@ -19,7 +21,19 @@ npm install      # instala dependencias
 npm run dev      # servidor de desarrollo (http://localhost:5173)
 npm run build    # build de producción a /dist
 npm run preview  # sirve /dist (acá funciona el service worker / PWA)
+npm test         # smoke test (arranca el dev server solo)
 ```
+
+Para el smoke test, una sola vez: `npx playwright install chromium`.
+
+## Estructura
+- `src/App.tsx` — orquestación: pantallas, estado y top bar.
+- `src/components/` — UI: `Ficha`, `Demo`, `PCard`, `Home`, `Guided`, `Estados`,
+  `ObjecionDrawer`, `BackBtn`.
+- `src/hooks/usePandaData.ts` — suscripciones a Firestore + normalización de schemas.
+- `src/lib/` — `firebase.ts`, `format.ts` (córdobas, `toNum`), `objeciones.ts` (cascada).
+- `src/config.ts` — **valores de negocio editables**: tipo de cambio (`USD_TO_NIO`),
+  promo del top bar (`PROMO`, con fecha de vencimiento) y texto de cierre del demo.
 
 ## Firebase
 La configuración está en `src/firebase-applet-config.json` (la misma del POS).
@@ -32,7 +46,9 @@ Usa **base de datos nombrada** (`firestoreDatabaseId`) y sesión **anónima**
 ## PWA / kiosco
 - `public/manifest.webmanifest`: nombre **Panda Asesor**, `display: standalone`,
   `orientation: landscape`, íconos placeholder (`public/icon-192.png`, `icon-512.png`).
-- `public/sw.js`: cachea el shell para instalación e inicio offline.
+- `public/sw.js`: cachea el shell para instalación e inicio offline. Al cambiar
+  el shell, subí la versión de `SHELL_CACHE`; el cache runtime tiene tope de
+  entradas para que no crezca sin límite en el kiosco.
 - El service worker se registra **solo en producción**. Para probar la instalación:
   `npm run build && npm run preview`.
 - Reemplazá los íconos placeholder por los definitivos cuando los tengas.

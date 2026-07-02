@@ -34,6 +34,8 @@ export interface Media {
   fotos?: string[];
   videos?: string[];
   heroImage?: string;
+  /** Galería de fotos (nombre del campo en el POS: TabletMedia.gallery). */
+  gallery?: string[];
   videoUrl?: string;
 }
 

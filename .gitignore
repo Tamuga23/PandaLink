@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# Windows
+desktop.ini
+Thumbs.db
+
+# Playwright
+test-results
+playwright-report
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

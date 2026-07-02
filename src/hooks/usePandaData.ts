@@ -11,6 +11,11 @@ export interface PandaData {
   error: string | null;
 }
 
+// El POS guarda slugs en español; la app filtra en inglés. Se aplica tanto a
+// productos como a objeciones_categoria para que SIEMPRE coincidan entre sí.
+const SLUG_MAP: Record<string, string> = { proyector: 'projector', camara: 'security-cam', parlante: 'speaker' };
+const mapSlug = (s: string) => SLUG_MAP[s.toLowerCase()] ?? s;
+
 // Normaliza campos alternativos del admin de PandaStore al schema que usa PandaLink.
 // Esto permite que documentos con nomenclatura antigua/diferente se muestren igual.
 function normalizarProducto(raw: Record<string, unknown>): Producto {
@@ -29,16 +34,21 @@ function normalizarProducto(raw: Record<string, unknown>): Producto {
   if (!p.categorySlug && p.category) p.categorySlug = p.category;
 
   // normalizar slugs en español → inglés (POS guarda 'proyector', app filtra por 'projector')
-  const SLUG_MAP: Record<string, string> = { proyector: 'projector', camara: 'security-cam', parlante: 'speaker' };
-  if (p.categorySlug && SLUG_MAP[p.categorySlug as string]) p.categorySlug = SLUG_MAP[p.categorySlug as string];
+  if (p.categorySlug) p.categorySlug = mapSlug(p.categorySlug as string);
 
-  // precio: varios schemas posibles
-  // Schema A: { cost } → { actual: cost }
-  // Schema B: { price, precioPromo, descEfectivoPct, campania }
+  // precio: dos schemas posibles.
+  // 1) Doc de catalogo_publico (backfill del POS): { precio: { lista, actual, efectivo, ... } }
+  //    → la UI usa `regular`, así que mapeamos lista → regular.
+  // 2) Campos sueltos estilo `products`: { price, precioPromo, descEfectivoPct, campania }.
+  // NUNCA usar `cost`: es el costo interno del POS y jamás debe mostrarse como precio.
+  if (p.precio && typeof p.precio === "object") {
+    const pr = p.precio as Record<string, unknown>;
+    if (pr.regular == null && pr.lista != null) pr.regular = pr.lista;
+  }
   if (!p.precio) {
-    if (p.precioPromo != null || p.price != null || p.cost != null) {
-      const actual = (p.precioPromo ?? p.cost) as number | undefined;
-      const regular = (p.price ?? actual) as number | undefined;
+    if (p.precioPromo != null || p.price != null) {
+      const regular = p.price as number | undefined;
+      const actual = (p.precioPromo ?? regular) as number | undefined;
       const descPct = p.descEfectivoPct as number | undefined;
       const efectivo =
         actual != null && descPct != null
@@ -82,21 +92,23 @@ function normalizarProducto(raw: Record<string, unknown>): Producto {
     if (!m.heroImage) p.media = { ...m, heroImage: p.imageBase64 as string };
   }
 
-  // bullets: normalizar text → texto
+  // bullets: respetar `order` si viene del POS y normalizar text → texto
   if (Array.isArray(p.bullets)) {
-    p.bullets = (p.bullets as Record<string, unknown>[]).map((b) => ({
-      ...b,
-      texto: b.texto ?? b.text,
-    }));
+    p.bullets = (p.bullets as Record<string, unknown>[])
+      .slice()
+      .sort((a, b) => ((a.order as number) ?? 99) - ((b.order as number) ?? 99))
+      .map((b) => ({ ...b, texto: b.texto ?? b.text }));
   }
 
-  // objecionesOverride: objId → id y pregunta (schema PandaStore)
+  // objecionesOverride: objId → id; titulo → pregunta.
+  // Si el override no trae texto de pregunta, queda vacía y la cascada
+  // (objecionesDe) hereda la pregunta de la objeción base que reemplaza.
   if (Array.isArray(p.objecionesOverride)) {
     p.objecionesOverride = (p.objecionesOverride as Record<string, unknown>[]).map(
       (o) => ({
         ...o,
         id: o.id ?? o.objId,
-        pregunta: o.pregunta ?? o.objId,
+        pregunta: o.pregunta ?? o.titulo ?? "",
       }),
     );
   }
@@ -122,11 +134,14 @@ function normalizarUniversal(raw: Record<string, unknown>): Objecion {
   };
 }
 
-// objeciones_categoria ya tiene pregunta y orden, solo propagamos categorySlug.
+// objeciones_categoria ya tiene pregunta y orden. El categorySlug pasa por el
+// MISMO SLUG_MAP que los productos: en Firestore está en español ('proyector')
+// y los productos normalizados quedan en inglés ('projector') — sin esto,
+// las objeciones por categoría jamás coinciden y no aparecen en la ficha.
 function normalizarCategoria(raw: Record<string, unknown>): Objecion {
   return {
     id: raw.id as string,
-    categorySlug: (raw.categorySlug ?? "") as string,
+    categorySlug: mapSlug((raw.categorySlug ?? "") as string),
     pregunta: (raw.pregunta ?? "") as string,
     respuesta: (raw.respuesta ?? "") as string,
     orden: raw.orden as number | undefined,
@@ -154,6 +169,7 @@ export function usePandaData(): PandaData {
         if (!active) return;
 
         // Catálogo: traemos TODO y mostramos el estado (Disponible / Agotado).
+        // Es la ÚNICA colección que bloquea la app si falla.
         unsubCat = onSnapshot(
           collection(db, "catalogo_publico"),
           (snap) => {
@@ -166,12 +182,14 @@ export function usePandaData(): PandaData {
               return (b.precio?.actual ?? 0) - (a.precio?.actual ?? 0);
             });
             setCatalogo(items);
+            setError(null);
             setCatReady(true);
           },
           (e) => { setError(traducirError(e)); setCatReady(true); },
         );
 
         // Universales: campos titulo→pregunta, order→orden.
+        // Si falla, la app sigue (la ficha muestra "Sin objeciones cargadas").
         unsubUni = onSnapshot(
           collection(db, "objeciones_universales"),
           (snap) => {
@@ -181,10 +199,11 @@ export function usePandaData(): PandaData {
             setUniversales(items);
             setUniReady(true);
           },
-          (e) => { setError(traducirError(e)); setUniReady(true); },
+          (e) => { console.warn("objeciones_universales:", e); setUniReady(true); },
         );
 
         // Por categoría: traemos TODO y filtramos en cliente (evita índice compuesto).
+        // Igual que universales: si falla, no bloquea la app (solo warn).
         unsubCatObj = onSnapshot(
           collection(db, "objeciones_categoria"),
           (snap) => {
@@ -194,7 +213,7 @@ export function usePandaData(): PandaData {
             setPorCategoria(items);
             setCatObjReady(true);
           },
-          (e) => { setError(traducirError(e)); setCatObjReady(true); },
+          (e) => { console.warn("objeciones_categoria:", e); setCatObjReady(true); },
         );
       })
       .catch((e) => {

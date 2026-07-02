@@ -11,7 +11,10 @@ const app = initializeApp(firebaseConfig);
 export const db = initializeFirestore(
   app,
   {
-    experimentalForceLongPolling: true,
+    // Auto-detecta si la red necesita long polling (force penalizaba siempre).
+    // Si en la tienda aparecen problemas de conexión, volver a
+    // experimentalForceLongPolling: true.
+    experimentalAutoDetectLongPolling: true,
     ignoreUndefinedProperties: true,
   },
   firebaseConfig.firestoreDatabaseId,
