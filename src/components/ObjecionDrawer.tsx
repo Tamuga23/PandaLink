@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import type { Objecion } from "../types";
+import { VOZ_ASESOR } from "../config";
 
 // Drawer inferior con la respuesta lista para leerle al cliente.
 export function ObjecionDrawer({ obj, onClose }: { obj: Objecion; onClose: () => void }) {
@@ -21,10 +22,10 @@ export function ObjecionDrawer({ obj, onClose }: { obj: Objecion; onClose: () =>
             <X size={16} />
           </button>
         </div>
-        <p className="text-xs text-stone-400 mt-1">
-          Respuesta lista para leerle al cliente · en la voz de Carlos
+        <p className="text-xs text-stone-400 dark:text-zinc-500 mt-1">
+          Respuesta lista para leerle al cliente · en la voz de {VOZ_ASESOR}
         </p>
-        <div className="mt-3 bg-stone-50 dark:bg-zinc-700 border-l-4 border-zinc-800 dark:border-zinc-400 rounded-r-xl p-4 text-zinc-800 dark:text-zinc-100 leading-relaxed">
+        <div className="mt-3 bg-stone-50 dark:bg-zinc-700 border-l-4 border-cyan-500 dark:border-cyan-400 rounded-r-xl p-4 text-zinc-800 dark:text-zinc-100 leading-relaxed">
           {obj.respuesta}
         </div>
       </div>

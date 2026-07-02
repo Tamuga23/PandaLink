@@ -8,3 +8,6 @@ export const PROMO = { texto: "🎯 Mundial 2026", hasta: "2026-07-19" };
 
 // Pie del precio en modo demo.
 export const CIERRE_DEMO = "factura · garantía 3 meses · entrega inmediata";
+
+// Nombre del asesor que "firma" las respuestas del drawer de objeciones.
+export const VOZ_ASESOR = "Carlos";

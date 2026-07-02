@@ -12,16 +12,12 @@ export function Ficha({
   onBack,
   onObj,
   onDemo,
-  empujon,
-  setEmpujon,
 }: {
   p: Producto;
   objeciones: Objecion[];
   onBack: () => void;
   onObj: (o: Objecion) => void;
   onDemo: () => void;
-  empujon: boolean;
-  setEmpujon: (v: boolean) => void;
 }) {
   const [dist, setDist] = useState(2.5);
   const [size, setSize] = useState(100);
@@ -41,18 +37,18 @@ export function Ficha({
   return (
     <div>
       <BackBtn onClick={onBack} />
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-6 xl:gap-10">
         {/* Izquierda */}
         <div>
           <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">{p.name}</h2>
           <p className="text-stone-500 mt-1 flex items-center gap-2">
             {p.beneficio}
             {p.disponible ? (
-              <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/30 shrink-0">
                 ● Disponible
               </span>
             ) : (
-              <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 shrink-0">
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30 shrink-0">
                 ● Agotado
               </span>
             )}
@@ -65,7 +61,7 @@ export function Ficha({
               <span className="px-3 text-center">imagen / video {p.name}</span>
             )}
           </div>
-          <p className="text-[11px] uppercase tracking-wide text-stone-400 font-bold mb-2">
+          <p className="text-xs uppercase tracking-wide text-stone-400 dark:text-zinc-500 font-bold mb-2">
             Lo que le decís al cliente
           </p>
           <ul className="space-y-2">
@@ -85,15 +81,20 @@ export function Ficha({
           </ul>
           <button
             onClick={onDemo}
-            className="mt-5 w-full border-2 border-dashed border-cyan-500/50 dark:border-cyan-500/40 rounded-xl py-3 font-bold text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-500/10 flex items-center justify-center gap-2 transition-colors"
+            disabled={!p.disponible}
+            className={`mt-5 w-full border-2 border-dashed rounded-xl py-3.5 font-bold flex items-center justify-center gap-2 transition-colors ${
+              p.disponible
+                ? "border-cyan-500/50 dark:border-cyan-500/40 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-500/10"
+                : "border-stone-200 dark:border-zinc-700 text-stone-300 dark:text-zinc-600 cursor-not-allowed"
+            }`}
           >
-            <Tv size={18} /> Mostrar al cliente (girar tablet)
+            <Tv size={18} /> Mostrar demo al cliente
           </button>
         </div>
 
         {/* Derecha */}
         <div>
-          <p className="text-[11px] uppercase tracking-wide text-stone-400 font-bold mb-2">
+          <p className="text-xs uppercase tracking-wide text-stone-400 dark:text-zinc-500 font-bold mb-2">
             Respuestas rápidas a objeciones
           </p>
           {objeciones.length === 0 ? (
@@ -104,7 +105,7 @@ export function Ficha({
                 <button
                   key={o.id}
                   onClick={() => onObj(o)}
-                  className="text-left text-[13px] font-semibold text-slate-700 dark:text-zinc-200 bg-slate-100 dark:bg-zinc-700 border border-slate-300 dark:border-zinc-600 rounded-lg px-3 py-2.5 hover:bg-slate-200 dark:hover:bg-zinc-600"
+                  className="min-h-[52px] text-left text-sm font-semibold text-slate-700 dark:text-zinc-200 bg-slate-100 dark:bg-zinc-700 border border-slate-300 dark:border-zinc-600 rounded-lg px-3 py-2.5 hover:bg-slate-200 dark:hover:bg-zinc-600 active:bg-slate-300 dark:active:bg-zinc-500 transition-colors"
                 >
                   {o.pregunta}
                 </button>
@@ -115,7 +116,7 @@ export function Ficha({
           {/* Calculadora — solo proyectores */}
           {p.categorySlug?.toLowerCase() === "projector" && (
           <>
-          <p className="text-[11px] uppercase tracking-wide text-stone-400 font-bold mt-5 mb-2">
+          <p className="text-xs uppercase tracking-wide text-stone-400 dark:text-zinc-500 font-bold mt-5 mb-2">
             Calculadora de distancia
           </p>
           <div className="bg-white dark:bg-zinc-800 border border-stone-200 dark:border-zinc-700 rounded-xl p-4">
@@ -128,7 +129,7 @@ export function Ficha({
                 step="0.1"
                 value={dist}
                 onChange={(e) => setDist(+e.target.value)}
-                className="flex-1 accent-zinc-900"
+                className="flex-1 accent-cyan-500"
               />
               <span className="text-xs bg-stone-100 dark:bg-zinc-700 border border-stone-200 dark:border-zinc-600 rounded px-2 py-1 w-16 text-center">
                 {dist.toFixed(1)} m
@@ -144,7 +145,7 @@ export function Ficha({
               )}
             </div>
             {chico && (
-              <div className="text-[12px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2 mt-2">
+              <div className="text-[12px] text-amber-800 bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/30 rounded-lg p-2 mt-2">
                 ⚠️ Cuarto muy chico: enfoca desde {dmin} m. Adviértalo para evitar devolución.
               </div>
             )}
@@ -157,7 +158,7 @@ export function Ficha({
                 step="5"
                 value={size}
                 onChange={(e) => setSize(+e.target.value)}
-                className="flex-1 accent-zinc-900"
+                className="flex-1 accent-cyan-500"
               />
               <span className="text-xs bg-stone-100 dark:bg-zinc-700 border border-stone-200 dark:border-zinc-600 rounded px-2 py-1 w-16 text-center">
                 {size}"
@@ -177,7 +178,7 @@ export function Ficha({
           )}
 
           {/* Precio y cierre */}
-          <p className="text-[11px] uppercase tracking-wide text-stone-400 font-bold mt-5 mb-2">
+          <p className="text-xs uppercase tracking-wide text-stone-400 dark:text-zinc-500 font-bold mt-5 mb-2">
             Precio y cierre
           </p>
           <div className="bg-white dark:bg-zinc-800 border border-stone-200 dark:border-zinc-700 rounded-xl p-4">
@@ -191,37 +192,34 @@ export function Ficha({
             <>
             {reg > act && (
               <div className="flex justify-between items-baseline py-1.5 border-b border-dashed border-stone-200 dark:border-zinc-600">
-                <span className="text-sm text-stone-500">Precio regular</span>
-                <span className="text-stone-400 line-through">{cordobas(reg)}</span>
+                <span className="text-sm text-stone-500 dark:text-zinc-400">Precio regular</span>
+                <span className="text-stone-400 dark:text-zinc-500 line-through">{cordobas(reg)}</span>
               </div>
             )}
             <div className="flex justify-between items-baseline py-1.5">
-              <span className="text-sm text-stone-600">Precio {hasDisc ? "con tarjeta" : "firme"}</span>
+              <span className="text-sm text-stone-600 dark:text-zinc-400">Precio {hasDisc ? "con tarjeta" : "firme"}</span>
               <span className="text-lg font-bold text-cyan-600 dark:text-cyan-400">{cordobas(act)}</span>
             </div>
-            {hasDisc ? (
-              <div className="mt-2">
-                {!empujon ? (
-                  <button
-                    onClick={() => setEmpujon(true)}
-                    className="w-full bg-cyan-500 hover:bg-cyan-400 text-white rounded-lg py-3 font-bold flex items-center justify-center gap-2 transition-colors"
-                  >
-                    <Sparkles size={16} /> Empujón final — efectivo / transferencia
-                  </button>
-                ) : (
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                    <div className="flex justify-between items-baseline">
-                      <span className="text-sm text-emerald-800">Efectivo o transferencia</span>
-                      <span className="text-xl font-extrabold text-emerald-700">{cordobas(efe)}</span>
-                    </div>
-                    <div className="text-xs text-stone-500 mt-1">
-                      Ahorro de {cordobas(act - efe)}. Soltalo solo si duda en el precio.
-                    </div>
-                  </div>
-                )}
+            {!p.disponible ? (
+              <div className="mt-2 bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-500/30 rounded-lg p-3 text-[12.5px] text-red-700 dark:text-red-300">
+                ● <b>Agotado.</b> Confirmá reposición en el POS antes de ofrecerlo.
+              </div>
+            ) : hasDisc ? (
+              // El precio de cierre SIEMPRE visible: el vendedor no debe
+              // depender de un tap extra para recordar la mejor cifra.
+              <div className="mt-2 bg-emerald-50 border border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/30 rounded-lg p-3">
+                <div className="flex justify-between items-baseline gap-2">
+                  <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                    <Sparkles size={14} /> Efectivo o transferencia
+                  </span>
+                  <span className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">{cordobas(efe)}</span>
+                </div>
+                <div className="text-xs text-stone-500 dark:text-zinc-400 mt-1">
+                  Ahorro de {cordobas(act - efe)} — el precio para cerrar la venta.
+                </div>
               </div>
             ) : (
-              <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg p-3 text-[12.5px] text-amber-800">
+              <div className="mt-2 bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/30 rounded-lg p-3 text-[12.5px] text-amber-800 dark:text-amber-300">
                 🔒 <b>Modelo sin descuento.</b> El precio mostrado es firme — no ofrecer rebaja.
               </div>
             )}

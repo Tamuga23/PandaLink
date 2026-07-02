@@ -3,6 +3,7 @@ import { Search, Sun, Moon, Building2, Popcorn } from "lucide-react";
 import { usePandaData } from "./hooks/usePandaData";
 import type { Objecion, Producto } from "./types";
 import { PROMO } from "./config";
+import { cordobas } from "./lib/format";
 import { objecionesDe } from "./lib/objeciones";
 import { Cargando, ErrorState, VacioState } from "./components/Estados";
 import { Home } from "./components/Home";
@@ -55,13 +56,22 @@ export default function App() {
     document.documentElement.classList.toggle("dark", next);
   };
   const [recos, setRecos] = useState<Recos | null>(null);
-  const [empujon, setEmpujon] = useState(false);
+  // Búsqueda global del header: 1 tap desde cualquier pantalla al producto.
+  const [gq, setGq] = useState("");
 
   const openFicha = (p: Producto) => {
     setSel(p);
-    setEmpujon(false);
+    setGq("");
     setScreen("ficha");
   };
+
+  const gResults = useMemo(() => {
+    const t = gq.trim().toLowerCase();
+    if (t.length < 2) return [];
+    return catalogo
+      .filter((p) => (p.name || "").toLowerCase().includes(t))
+      .slice(0, 8);
+  }, [catalogo, gq]);
 
   const activeCats = useMemo(() => {
     const slugsConStock = new Set(
@@ -145,6 +155,41 @@ export default function App() {
                   {label}
                 </button>
               ))}
+            </div>
+            {/* Búsqueda global: siempre a un tap, sin entrar al catálogo. */}
+            <div className="relative flex-1 max-w-xs ml-1">
+              <Search size={14} className="absolute left-2.5 top-2.5 text-stone-400 dark:text-zinc-500" />
+              <input
+                value={gq}
+                onChange={(e) => setGq(e.target.value)}
+                placeholder="Buscar modelo…"
+                className="w-full pl-8 pr-3 py-1.5 text-sm rounded-lg border border-stone-200 dark:border-zinc-700 bg-stone-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder:text-stone-400 dark:placeholder:text-zinc-500 outline-none focus:border-cyan-500 dark:focus:border-cyan-500 transition-colors"
+              />
+              {gResults.length > 0 && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setGq("")} />
+                  <div className="absolute left-0 right-0 top-10 z-20 bg-white dark:bg-zinc-800 border border-stone-200 dark:border-zinc-700 rounded-xl shadow-xl overflow-hidden">
+                    {gResults.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => openFicha(p)}
+                        className="w-full min-h-[48px] text-left px-3 py-2.5 text-sm flex items-center justify-between gap-2 hover:bg-stone-100 dark:hover:bg-zinc-700 border-b last:border-b-0 border-stone-100 dark:border-zinc-700"
+                      >
+                        <span className={`truncate font-medium text-zinc-900 dark:text-zinc-100 ${!p.disponible ? "opacity-50" : ""}`}>
+                          {p.name}
+                        </span>
+                        <span className="shrink-0 text-xs">
+                          {!p.disponible ? (
+                            <span className="text-red-500 dark:text-red-400 font-semibold">Agotado</span>
+                          ) : p.precio?.actual != null ? (
+                            <span className="text-cyan-600 dark:text-cyan-400 font-bold">{cordobas(p.precio.actual)}</span>
+                          ) : null}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
             <div className="ml-auto flex items-center gap-2">
               <span className="text-xs text-stone-500 dark:text-zinc-400 font-medium capitalize">{hoy}</span>
@@ -257,7 +302,7 @@ export default function App() {
                         Sin resultados{query ? ` para "${query}"` : ""}.
                       </p>
                     ) : (
-                      <div className="grid grid-cols-4 gap-3">
+                      <div className="grid grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3">
                         {filtered.map((p) => (
                           <PCard key={p.id} p={p} onClick={() => openFicha(p)} />
                         ))}
@@ -273,8 +318,6 @@ export default function App() {
                     onBack={() => setScreen("catalog")}
                     onObj={(o) => setDrawer(o)}
                     onDemo={() => setDemo(true)}
-                    empujon={empujon}
-                    setEmpujon={setEmpujon}
                   />
                 )}
               </>

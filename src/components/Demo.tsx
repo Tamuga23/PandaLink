@@ -59,7 +59,7 @@ export function Demo({ p, onClose, onHome }: { p: Producto; onClose: () => void;
         </div>
 
         {/* Panel derecho */}
-        <div className="w-72 flex flex-col gap-4 shrink-0">
+        <div className="w-72 lg:w-80 xl:w-96 flex flex-col gap-4 shrink-0">
           {/* Foto del producto */}
           {foto && (
             <div className="aspect-square w-full rounded-2xl bg-white overflow-hidden shrink-0">

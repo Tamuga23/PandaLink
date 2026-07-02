@@ -2,18 +2,30 @@ import type { Producto } from "../types";
 import { cordobas } from "../lib/format";
 
 export function PCard({ p, onClick }: { p: Producto; onClick: () => void }) {
-  const foto = p.media?.heroImage ?? p.media?.fotos?.[0];
+  const foto = p.media?.heroImage ?? p.media?.gallery?.[0] ?? p.media?.fotos?.[0];
+  const agotado = !p.disponible;
   return (
     <button
       onClick={onClick}
-      className="text-left bg-white dark:bg-zinc-800 border border-stone-200 dark:border-zinc-700 rounded-xl p-3 hover:border-zinc-900 dark:hover:border-zinc-400 hover:shadow-md transition-all"
+      className={`text-left bg-white dark:bg-zinc-800 border border-stone-200 dark:border-zinc-700 rounded-xl p-3 transition-all ${
+        agotado
+          ? "opacity-60 saturate-50 hover:opacity-80"
+          : "hover:border-cyan-500 dark:hover:border-cyan-500 hover:shadow-md"
+      }`}
     >
       {/* Portada CUADRADA (aspect-square + object-cover), con fallback al nombre. */}
-      <div className="aspect-square rounded-lg bg-gradient-to-br from-stone-100 to-stone-200 dark:from-zinc-700 dark:to-zinc-600 overflow-hidden flex items-center justify-center text-stone-400 dark:text-zinc-400 text-xs mb-2">
+      <div className="relative aspect-square rounded-lg bg-gradient-to-br from-stone-100 to-stone-200 dark:from-zinc-700 dark:to-zinc-600 overflow-hidden flex items-center justify-center text-stone-400 dark:text-zinc-400 text-xs mb-2">
         {foto ? (
           <img src={foto} alt={p.name} className="w-full h-full object-cover" />
         ) : (
           <span className="px-2 text-center">{p.name}</span>
+        )}
+        {agotado && (
+          <div className="absolute inset-0 bg-black/45 flex items-center justify-center">
+            <span className="text-white text-sm font-extrabold uppercase tracking-widest border-2 border-white/70 rounded-lg px-3 py-1">
+              Agotado
+            </span>
+          </div>
         )}
       </div>
       <div className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">{p.name}</div>
@@ -26,16 +38,16 @@ export function PCard({ p, onClick }: { p: Producto; onClick: () => void }) {
       </div>
       <div className="mt-1.5 flex items-center gap-2">
         {p.disponible ? (
-          <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/30">
             ● Disponible
           </span>
         ) : (
-          <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">
+          <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30">
             ● Agotado
           </span>
         )}
         {p.specs?.ansi != null && (
-          <span className="text-[11px] text-stone-400">{p.specs.ansi} ANSI</span>
+          <span className="text-[11px] text-stone-400 dark:text-zinc-500">{p.specs.ansi} ANSI</span>
         )}
       </div>
     </button>
