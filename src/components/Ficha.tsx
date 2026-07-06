@@ -98,92 +98,10 @@ export function Ficha({
         </div>
 
         {/* Derecha */}
-        <div>
+        <div className="flex flex-col gap-4">
+          {/* Precio y cierre — siempre primero */}
+          <div>
           <p className="text-xs uppercase tracking-wide text-stone-400 dark:text-zinc-500 font-bold mb-2">
-            Respuestas rápidas a objeciones
-          </p>
-          {objeciones.length === 0 ? (
-            <p className="text-stone-400 text-sm">Sin objeciones cargadas todavía.</p>
-          ) : (
-            <div className="grid grid-cols-2 gap-2">
-              {objeciones.map((o) => (
-                <button
-                  key={o.id}
-                  onClick={() => onObj(o)}
-                  className="min-h-[52px] text-left text-sm font-semibold text-slate-700 dark:text-zinc-200 bg-slate-100 dark:bg-zinc-700 border border-slate-300 dark:border-zinc-600 rounded-lg px-3 py-2.5 hover:bg-slate-200 dark:hover:bg-zinc-600 active:bg-slate-300 dark:active:bg-zinc-500 transition-colors"
-                >
-                  {o.pregunta}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Calculadora — solo proyectores */}
-          {p.categorySlug?.toLowerCase() === "projector" && (
-          <>
-          <p className="text-xs uppercase tracking-wide text-stone-400 dark:text-zinc-500 font-bold mt-5 mb-2">
-            Calculadora de distancia
-          </p>
-          <div className="bg-white dark:bg-zinc-800 border border-stone-200 dark:border-zinc-700 rounded-xl p-4">
-            <div className="flex items-center gap-3 mb-1">
-              <span className="text-xs text-stone-600 dark:text-zinc-400 w-28">Distancia a la pared</span>
-              <input
-                type="range"
-                min="0.6"
-                max="4"
-                step="0.1"
-                value={dist}
-                onChange={(e) => setDist(+e.target.value)}
-                className="flex-1 accent-cyan-500"
-              />
-              <span className="text-xs bg-stone-100 dark:bg-zinc-700 border border-stone-200 dark:border-zinc-600 rounded px-2 py-1 w-16 text-center">
-                {dist.toFixed(1)} m
-              </span>
-            </div>
-            <div className="text-sm bg-slate-50 dark:bg-zinc-700 border border-slate-200 dark:border-zinc-600 rounded-lg p-2.5 mt-1">
-              {pulg !== null ? (
-                <>
-                  A <b>{dist.toFixed(1)} m</b> proyecta <b>{pulg}"</b>.
-                </>
-              ) : (
-                "Throw ratio no cargado para este modelo."
-              )}
-            </div>
-            {chico && (
-              <div className="text-[12px] text-amber-800 bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/30 rounded-lg p-2 mt-2">
-                ⚠️ Cuarto muy chico: enfoca desde {dmin} m. Adviértalo para evitar devolución.
-              </div>
-            )}
-            <div className="flex items-center gap-3 mt-4 mb-1">
-              <span className="text-xs text-stone-600 dark:text-zinc-400 w-28">O: tamaño deseado</span>
-              <input
-                type="range"
-                min="40"
-                max="140"
-                step="5"
-                value={size}
-                onChange={(e) => setSize(+e.target.value)}
-                className="flex-1 accent-cyan-500"
-              />
-              <span className="text-xs bg-stone-100 dark:bg-zinc-700 border border-stone-200 dark:border-zinc-600 rounded px-2 py-1 w-16 text-center">
-                {size}"
-              </span>
-            </div>
-            <div className="text-sm bg-slate-50 dark:bg-zinc-700 border border-slate-200 dark:border-zinc-600 rounded-lg p-2.5">
-              {distNec !== null ? (
-                <>
-                  Para <b>{size}"</b> colóquelo a <b>{distNec} m</b>.
-                </>
-              ) : (
-                "—"
-              )}
-            </div>
-          </div>
-          </>
-          )}
-
-          {/* Precio y cierre */}
-          <p className="text-xs uppercase tracking-wide text-stone-400 dark:text-zinc-500 font-bold mt-5 mb-2">
             Precio y cierre
           </p>
           <div className="bg-white dark:bg-zinc-800 border border-stone-200 dark:border-zinc-700 rounded-xl p-4">
@@ -272,6 +190,95 @@ export function Ficha({
             </>
             )}
           </div>
+          </div>
+
+          {/* Objeciones — con scroll interno para no desplazar precio */}
+          <div>
+            <p className="text-xs uppercase tracking-wide text-stone-400 dark:text-zinc-500 font-bold mb-2">
+              Respuestas rápidas a objeciones
+            </p>
+            {objeciones.length === 0 ? (
+              <p className="text-stone-400 text-sm">Sin objeciones cargadas todavía.</p>
+            ) : (
+              <div className="overflow-y-auto max-h-[260px] pr-1">
+                <div className="grid grid-cols-2 gap-2">
+                  {objeciones.map((o) => (
+                    <button
+                      key={o.id}
+                      onClick={() => onObj(o)}
+                      className="min-h-[52px] text-left text-sm font-semibold text-slate-700 dark:text-zinc-200 bg-slate-100 dark:bg-zinc-700 border border-slate-300 dark:border-zinc-600 rounded-lg px-3 py-2.5 hover:bg-slate-200 dark:hover:bg-zinc-600 active:bg-slate-300 dark:active:bg-zinc-500 transition-colors"
+                    >
+                      {o.pregunta}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Calculadora — solo proyectores */}
+          {p.categorySlug?.toLowerCase() === "projector" && (
+          <div>
+          <p className="text-xs uppercase tracking-wide text-stone-400 dark:text-zinc-500 font-bold mb-2">
+            Calculadora de distancia
+          </p>
+          <div className="bg-white dark:bg-zinc-800 border border-stone-200 dark:border-zinc-700 rounded-xl p-4">
+            <div className="flex items-center gap-3 mb-1">
+              <span className="text-xs text-stone-600 dark:text-zinc-400 w-28">Distancia a la pared</span>
+              <input
+                type="range"
+                min="0.6"
+                max="4"
+                step="0.1"
+                value={dist}
+                onChange={(e) => setDist(+e.target.value)}
+                className="flex-1 accent-cyan-500"
+              />
+              <span className="text-xs bg-stone-100 dark:bg-zinc-700 border border-stone-200 dark:border-zinc-600 rounded px-2 py-1 w-16 text-center">
+                {dist.toFixed(1)} m
+              </span>
+            </div>
+            <div className="text-sm bg-slate-50 dark:bg-zinc-700 border border-slate-200 dark:border-zinc-600 rounded-lg p-2.5 mt-1">
+              {pulg !== null ? (
+                <>
+                  A <b>{dist.toFixed(1)} m</b> proyecta <b>{pulg}"</b>.
+                </>
+              ) : (
+                "Throw ratio no cargado para este modelo."
+              )}
+            </div>
+            {chico && (
+              <div className="text-[12px] text-amber-800 bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/30 rounded-lg p-2 mt-2">
+                ⚠️ Cuarto muy chico: enfoca desde {dmin} m. Adviértalo para evitar devolución.
+              </div>
+            )}
+            <div className="flex items-center gap-3 mt-4 mb-1">
+              <span className="text-xs text-stone-600 dark:text-zinc-400 w-28">O: tamaño deseado</span>
+              <input
+                type="range"
+                min="40"
+                max="140"
+                step="5"
+                value={size}
+                onChange={(e) => setSize(+e.target.value)}
+                className="flex-1 accent-cyan-500"
+              />
+              <span className="text-xs bg-stone-100 dark:bg-zinc-700 border border-stone-200 dark:border-zinc-600 rounded px-2 py-1 w-16 text-center">
+                {size}"
+              </span>
+            </div>
+            <div className="text-sm bg-slate-50 dark:bg-zinc-700 border border-slate-200 dark:border-zinc-600 rounded-lg p-2.5">
+              {distNec !== null ? (
+                <>
+                  Para <b>{size}"</b> colóquelo a <b>{distNec} m</b>.
+                </>
+              ) : (
+                "—"
+              )}
+            </div>
+          </div>
+          </div>
+          )}
         </div>
       </div>
     </div>
