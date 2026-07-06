@@ -2,7 +2,11 @@ import { useState } from "react";
 import { Tv, Sparkles } from "lucide-react";
 import type { Bullet, Objecion, Producto } from "../types";
 import { toNum, cordobas } from "../lib/format";
+import { USD_TO_NIO } from "../config";
 import { BackBtn } from "./BackBtn";
+
+// Redondea córdobas al múltiplo de 10 más cercano (evita precios como C$4,436.67).
+const round10 = (usd: number) => Math.round((usd * USD_TO_NIO) / 10) * 10;
 
 const K = 45.17; // constante 16:9 validada contra ficha del fabricante
 
@@ -212,10 +216,10 @@ export function Ficha({
                   <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
                     <Sparkles size={14} /> Efectivo o transferencia
                   </span>
-                  <span className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">{cordobas(efe)}</span>
+                  <span className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">C${round10(efe).toLocaleString("es-NI")}</span>
                 </div>
                 <div className="text-xs text-stone-500 dark:text-zinc-400 mt-1">
-                  Ahorro de {cordobas(act - efe)} — el precio para cerrar la venta.
+                  Ahorro de C${(Math.round(act * USD_TO_NIO / 10) * 10 - round10(efe)).toLocaleString("es-NI")} — el precio para cerrar la venta.
                 </div>
               </div>
             ) : (
