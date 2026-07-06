@@ -25,6 +25,7 @@ export function Ficha({
 }) {
   const [dist, setDist] = useState(2.5);
   const [size, setSize] = useState(100);
+  const [showEfe, setShowEfe] = useState(false);
 
   const foto = p.media?.heroImage ?? p.media?.gallery?.[0] ?? p.media?.fotos?.[0];
   const tr = toNum(p.specs?.throwRatio);
@@ -209,19 +210,29 @@ export function Ficha({
                 ● <b>Agotado.</b> Confirmá reposición en el POS antes de ofrecerlo.
               </div>
             ) : hasDisc ? (
-              // El precio de cierre SIEMPRE visible: el vendedor no debe
-              // depender de un tap extra para recordar la mejor cifra.
-              <div className="mt-2 bg-emerald-50 border border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/30 rounded-lg p-3">
-                <div className="flex justify-between items-baseline gap-2">
-                  <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
-                    <Sparkles size={14} /> Efectivo o transferencia
-                  </span>
-                  <span className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">C${round10(efe).toLocaleString("es-NI")}</span>
+              !showEfe ? (
+                <button
+                  onClick={() => setShowEfe(true)}
+                  className="mt-2 w-full flex items-center justify-center gap-2 border-2 border-dashed border-emerald-400 dark:border-emerald-600 rounded-xl py-3 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
+                >
+                  <Sparkles size={15} /> Revelar precio efectivo / transferencia
+                </button>
+              ) : (
+                <div
+                  className="mt-2 bg-emerald-50 border-2 border-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500 rounded-xl p-4 cursor-pointer"
+                  onClick={() => setShowEfe(false)}
+                >
+                  <div className="flex justify-between items-baseline gap-2">
+                    <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                      <Sparkles size={14} /> Efectivo o transferencia
+                    </span>
+                    <span className="text-3xl font-extrabold text-emerald-700 dark:text-emerald-400">C${round10(efe).toLocaleString("es-NI")}</span>
+                  </div>
+                  <div className="text-xs text-stone-500 dark:text-zinc-400 mt-1">
+                    Ahorro de C${(Math.round(act * USD_TO_NIO / 10) * 10 - round10(efe)).toLocaleString("es-NI")} — el precio para cerrar la venta.
+                  </div>
                 </div>
-                <div className="text-xs text-stone-500 dark:text-zinc-400 mt-1">
-                  Ahorro de C${(Math.round(act * USD_TO_NIO / 10) * 10 - round10(efe)).toLocaleString("es-NI")} — el precio para cerrar la venta.
-                </div>
-              </div>
+              )
             ) : (
               <div className="mt-2 bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/30 rounded-lg p-3 text-[12.5px] text-amber-800 dark:text-amber-300">
                 🔒 <b>Modelo sin descuento.</b> El precio mostrado es firme — no ofrecer rebaja.
