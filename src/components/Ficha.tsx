@@ -121,7 +121,7 @@ export function Ficha({
             )}
             <div className="flex justify-between items-baseline py-1.5">
               <span className="text-sm text-stone-600 dark:text-zinc-400">Precio {hasDisc ? "con tarjeta" : "firme"}</span>
-              <span className="text-lg font-bold text-cyan-600 dark:text-cyan-400">{cordobas(act)}</span>
+              <span className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">{cordobas(act)}</span>
             </div>
             {!p.disponible ? (
               <div className="mt-2 bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-500/30 rounded-lg p-3 text-[12.5px] text-red-700 dark:text-red-300">
@@ -133,7 +133,7 @@ export function Ficha({
                   onClick={() => setShowEfe(true)}
                   className="mt-2 w-full flex items-center justify-center gap-2 border-2 border-dashed border-emerald-400 dark:border-emerald-600 rounded-xl py-3 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
                 >
-                  <Sparkles size={15} /> Revelar precio efectivo / transferencia
+                  <Sparkles size={15} /> Ver opciones de pago
                 </button>
               ) : (
                 <div
@@ -178,7 +178,7 @@ export function Ficha({
                           {meses} cuotas
                         </div>
                         <div className="text-2xl font-extrabold text-zinc-800 dark:text-zinc-100 leading-tight">
-                          C${cuotaNio.toLocaleString("es-NI", { maximumFractionDigits: 2 })}
+                          C${Math.round(cuotaNio).toLocaleString("es-NI")}
                         </div>
                         <div className="text-xs text-stone-400 dark:text-zinc-500 mt-1">/ mes · 0% interés</div>
                       </div>
