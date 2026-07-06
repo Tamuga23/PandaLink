@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Tv, Sparkles } from "lucide-react";
 import type { Bullet, Objecion, Producto } from "../types";
 import { toNum, cordobas } from "../lib/format";
-import { USD_TO_NIO } from "../config";
+import { USD_TO_NIO, FINANCIAMIENTO_MIN_USD, FINANCIAMIENTO_PLAZOS } from "../config";
 import { BackBtn } from "./BackBtn";
 
 // Redondea córdobas al múltiplo de 10 más cercano (evita precios como C$4,436.67).
@@ -225,6 +225,34 @@ export function Ficha({
             ) : (
               <div className="mt-2 bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/30 rounded-lg p-3 text-[12.5px] text-amber-800 dark:text-amber-300">
                 🔒 <b>Modelo sin descuento.</b> El precio mostrado es firme — no ofrecer rebaja.
+              </div>
+            )}
+
+            {/* Financiamiento 0% — solo si precio con tarjeta >= umbral */}
+            {act != null && act >= FINANCIAMIENTO_MIN_USD && (
+              <div className="mt-3 border border-dashed border-stone-300 dark:border-zinc-600 rounded-xl p-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-stone-400 dark:text-zinc-500 mb-2">
+                  💳 Financiamiento sin intereses
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {FINANCIAMIENTO_PLAZOS.map((meses) => {
+                    const cuotaNio = (act * USD_TO_NIO) / meses;
+                    return (
+                      <div
+                        key={meses}
+                        className="bg-stone-50 dark:bg-zinc-700 rounded-lg px-3 py-2.5 text-center"
+                      >
+                        <div className="text-[11px] text-stone-500 dark:text-zinc-400 mb-0.5">
+                          {meses} cuotas
+                        </div>
+                        <div className="text-lg font-extrabold text-zinc-800 dark:text-zinc-100">
+                          C${cuotaNio.toLocaleString("es-NI", { maximumFractionDigits: 2 })}
+                        </div>
+                        <div className="text-[10px] text-stone-400 dark:text-zinc-500">/ mes</div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
             </>
