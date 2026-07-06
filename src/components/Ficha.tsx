@@ -231,9 +231,12 @@ export function Ficha({
             {/* Financiamiento 0% — solo si precio con tarjeta >= umbral */}
             {act != null && act >= FINANCIAMIENTO_MIN_USD && (
               <div className="mt-3 border border-dashed border-stone-300 dark:border-zinc-600 rounded-xl p-3">
-                <p className="text-xs font-bold uppercase tracking-wide text-stone-400 dark:text-zinc-500 mb-2">
-                  💳 Financiamiento sin intereses
-                </p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-bold uppercase tracking-wide text-stone-400 dark:text-zinc-500">
+                    💳 Financiamiento sin intereses
+                  </p>
+                  <img src="/banpro.svg" alt="Banpro" className="h-6 opacity-80" />
+                </div>
                 <div className="grid grid-cols-2 gap-2">
                   {FINANCIAMIENTO_PLAZOS.map((meses) => {
                     const cuotaNio = (act * USD_TO_NIO) / meses;
