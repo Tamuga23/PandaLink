@@ -230,28 +230,28 @@ export function Ficha({
 
             {/* Financiamiento 0% — solo si precio con tarjeta >= umbral */}
             {act != null && act >= FINANCIAMIENTO_MIN_USD && (
-              <div className="mt-3 border border-dashed border-stone-300 dark:border-zinc-600 rounded-xl p-3">
-                <div className="flex items-center justify-between mb-2">
+              <div className="mt-3 border border-dashed border-stone-300 dark:border-zinc-600 rounded-xl p-4">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <img src="/banpro.svg" alt="Banpro" style={{ height: 35 }} className="opacity-90 shrink-0" />
                   <p className="text-xs font-bold uppercase tracking-wide text-stone-400 dark:text-zinc-500">
-                    💳 Financiamiento sin intereses
+                    Financiamiento sin intereses
                   </p>
-                  <img src="/banpro.svg" alt="Banpro" className="h-6 opacity-80" />
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   {FINANCIAMIENTO_PLAZOS.map((meses) => {
                     const cuotaNio = (act * USD_TO_NIO) / meses;
                     return (
                       <div
                         key={meses}
-                        className="bg-stone-50 dark:bg-zinc-700 rounded-lg px-3 py-2.5 text-center"
+                        className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-700/40 rounded-xl px-4 py-4 text-center"
                       >
-                        <div className="text-[11px] text-stone-500 dark:text-zinc-400 mb-0.5">
+                        <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-400 mb-1">
                           {meses} cuotas
                         </div>
-                        <div className="text-lg font-extrabold text-zinc-800 dark:text-zinc-100">
+                        <div className="text-2xl font-extrabold text-zinc-800 dark:text-zinc-100 leading-tight">
                           C${cuotaNio.toLocaleString("es-NI", { maximumFractionDigits: 2 })}
                         </div>
-                        <div className="text-[10px] text-stone-400 dark:text-zinc-500">/ mes</div>
+                        <div className="text-xs text-stone-400 dark:text-zinc-500 mt-1">/ mes · 0% interés</div>
                       </div>
                     );
                   })}
