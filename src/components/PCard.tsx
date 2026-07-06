@@ -1,9 +1,15 @@
 import type { Producto } from "../types";
 import { cordobas } from "../lib/format";
+import { FINANCIAMIENTO_MIN_USD, FINANCIAMIENTO_PLAZOS, USD_TO_NIO } from "../config";
 
 export function PCard({ p, onClick }: { p: Producto; onClick: () => void }) {
   const foto = p.media?.heroImage ?? p.media?.gallery?.[0] ?? p.media?.fotos?.[0];
   const agotado = !p.disponible;
+  const act = p.precio?.actual ?? null;
+  const aplicaCuotas = act != null && act >= FINANCIAMIENTO_MIN_USD;
+  const cuotaMin = aplicaCuotas
+    ? Math.round((act! * USD_TO_NIO) / Math.max(...FINANCIAMIENTO_PLAZOS))
+    : null;
   return (
     <button
       onClick={onClick}
@@ -36,6 +42,11 @@ export function PCard({ p, onClick }: { p: Producto; onClick: () => void }) {
           <span className="text-stone-400 dark:text-zinc-500 font-normal text-xs">Sin precio</span>
         )}
       </div>
+      {aplicaCuotas && (
+        <div className="mt-0.5 text-[11px] text-stone-400 dark:text-zinc-500">
+          desde C${cuotaMin!.toLocaleString("es-NI")} / mes · 0%
+        </div>
+      )}
       <div className="mt-1.5 flex items-center gap-2">
         {p.disponible ? (
           <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/30">
