@@ -30,12 +30,22 @@ export interface Precio {
   campania?: string;
 }
 
+/** Foto complementaria con etiqueta corta (ej. "A oscuras", "Con luz"). */
+export interface FotoGaleria {
+  url: string;
+  label?: string;
+}
+
 export interface Media {
   fotos?: string[];
   videos?: string[];
   heroImage?: string;
-  /** Galería de fotos (nombre del campo en el POS: TabletMedia.gallery). */
-  gallery?: string[];
+  /**
+   * Galería de fotos (campo del POS: TabletMedia.gallery). El POS nuevo manda
+   * {url, label}; docs viejos traen strings — el normalizador unifica a
+   * FotoGaleria[], la UI puede asumir SIEMPRE objetos.
+   */
+  gallery?: FotoGaleria[];
   videoUrl?: string;
 }
 

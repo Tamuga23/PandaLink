@@ -27,7 +27,7 @@ export function Ficha({
   const [size, setSize] = useState(100);
   const [showEfe, setShowEfe] = useState(false);
 
-  const foto = p.media?.heroImage ?? p.media?.gallery?.[0] ?? p.media?.fotos?.[0];
+  const foto = p.media?.heroImage ?? p.media?.gallery?.[0]?.url ?? p.media?.fotos?.[0];
   const tr = toNum(p.specs?.throwRatio);
   const dmin = toNum(p.specs?.distMinEnfoque);
   const pulg = Number.isNaN(tr) ? null : Math.round((dist / tr) * K);

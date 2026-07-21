@@ -3,7 +3,7 @@ import { cordobas } from "../lib/format";
 import { FINANCIAMIENTO_MIN_USD, FINANCIAMIENTO_PLAZOS, USD_TO_NIO } from "../config";
 
 export function PCard({ p, onClick }: { p: Producto; onClick: () => void }) {
-  const foto = p.media?.heroImage ?? p.media?.gallery?.[0] ?? p.media?.fotos?.[0];
+  const foto = p.media?.heroImage ?? p.media?.gallery?.[0]?.url ?? p.media?.fotos?.[0];
   const agotado = !p.disponible;
   const act = p.precio?.actual ?? null;
   const aplicaCuotas = act != null && act >= FINANCIAMIENTO_MIN_USD;

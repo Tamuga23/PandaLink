@@ -92,6 +92,22 @@ function normalizarProducto(raw: Record<string, unknown>): Producto {
     if (!m.heroImage) p.media = { ...m, heroImage: p.imageBase64 as string };
   }
 
+  // galería: unificar a {url, label?}. El POS nuevo manda objetos; docs viejos
+  // traen strings. Se descartan entradas sin URL. La UI asume SIEMPRE objetos.
+  if (p.media && typeof p.media === "object") {
+    const m = p.media as Record<string, unknown>;
+    if (Array.isArray(m.gallery)) {
+      m.gallery = (m.gallery as unknown[])
+        .map((g) => (typeof g === "string" ? { url: g } : g))
+        .filter(
+          (g): g is { url: string } =>
+            !!g &&
+            typeof (g as { url?: unknown }).url === "string" &&
+            ((g as { url: string }).url.trim().length > 0),
+        );
+    }
+  }
+
   // bullets: respetar `order` si viene del POS y normalizar text → texto
   if (Array.isArray(p.bullets)) {
     p.bullets = (p.bullets as Record<string, unknown>[])
