@@ -28,11 +28,13 @@ interface Recos {
 
 const SLUG_LABEL: Record<string, string> = {
   projector: "Proyectores",
-  "security-cam": "Cámaras",
   smartwatch: "Smartwatch",
+  dashcam: "Dashcams",
+  "security-cam": "Cámaras",
+  smarthome: "Smart home",
   speaker: "Parlantes",
 };
-const SLUG_ORDER = ["projector", "smartwatch", "security-cam", "speaker"];
+const SLUG_ORDER = ["projector", "smartwatch", "dashcam", "security-cam", "smarthome", "speaker"];
 
 export default function App() {
   const { catalogo, universales, porCategoria, loading, error } = usePandaData();
