@@ -37,7 +37,8 @@ const SLUG_LABEL: Record<string, string> = {
 const SLUG_ORDER = ["projector", "smartwatch", "dashcam", "security-cam", "smarthome", "speaker"];
 
 export default function App() {
-  const { catalogo, universales, porCategoria, loading, error } = usePandaData();
+  const { catalogo, universales, porCategoria, configFinanciamiento, loading, error } =
+    usePandaData();
   const [screen, setScreen] = useState<Screen>("home");
   const [sel, setSel] = useState<Producto | null>(null);
   const [drawer, setDrawer] = useState<Objecion | null>(null);
@@ -280,7 +281,12 @@ export default function App() {
                     ) : (
                       <div className="grid grid-cols-2 gap-4">
                         {recos.list.map((p) => (
-                          <PCard key={p.id} p={p} onClick={() => openFicha(p)} />
+                          <PCard
+                            key={p.id}
+                            p={p}
+                            configFinanciamiento={configFinanciamiento}
+                            onClick={() => openFicha(p)}
+                          />
                         ))}
                       </div>
                     )}
@@ -306,7 +312,12 @@ export default function App() {
                     ) : (
                       <div className="grid grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3">
                         {filtered.map((p) => (
-                          <PCard key={p.id} p={p} onClick={() => openFicha(p)} />
+                          <PCard
+                            key={p.id}
+                            p={p}
+                            configFinanciamiento={configFinanciamiento}
+                            onClick={() => openFicha(p)}
+                          />
                         ))}
                       </div>
                     )}
@@ -317,6 +328,7 @@ export default function App() {
                   <Ficha
                     p={sel}
                     objeciones={objecionesDe(sel, universales, porCategoria)}
+                    configFinanciamiento={configFinanciamiento}
                     onBack={() => setScreen("catalog")}
                     onObj={(o) => setDrawer(o)}
                     onDemo={() => setDemo(true)}

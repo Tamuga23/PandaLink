@@ -6,9 +6,11 @@ export const USD_TO_NIO = 36.6243;
 // Badge de promo del top bar. Se oculta solo pasada la fecha `hasta` (inclusive).
 export const PROMO = { texto: "🎯 Mundial 2026", hasta: "2026-07-19" };
 
-// Financiamiento 0% interés: umbral mínimo en USD y plazos disponibles.
-export const FINANCIAMIENTO_MIN_USD = 100;
-export const FINANCIAMIENTO_PLAZOS = [3, 6]; // meses
+// El financiamiento ya NO se configura acá. El umbral, los plazos y el recargo
+// por categoría viven en Firestore (`config/financiamiento`, editable desde
+// Configuración del POS) y los calcula src/lib/financiamiento.ts, el mismo
+// módulo que usa PandaWEB. El respaldo, si Firestore no responde, es
+// CONFIG_FINANCIAMIENTO_DEFAULT en ese archivo.
 
 // Pie del precio en modo demo.
 export const CIERRE_DEMO = "factura · garantía 3 meses · entrega inmediata";

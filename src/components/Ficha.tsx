@@ -1,8 +1,14 @@
 import { useState } from "react";
-import { Tv, Sparkles } from "lucide-react";
+import { Tv, Sparkles, ListChecks, ChevronDown } from "lucide-react";
 import type { Bullet, Objecion, Producto } from "../types";
 import { toNum, cordobas } from "../lib/format";
-import { USD_TO_NIO, FINANCIAMIENTO_MIN_USD, FINANCIAMIENTO_PLAZOS } from "../config";
+import { filasDeSpecs, resolverCategoriaSpec } from "../lib/categorySpecs";
+import { USD_TO_NIO } from "../config";
+import {
+  calcularPlanes,
+  todosSinInteres,
+  type ConfigFinanciamiento,
+} from "../lib/financiamiento";
 import { BackBtn } from "./BackBtn";
 
 // Redondea córdobas al múltiplo de 10 más cercano (evita precios como C$4,436.67).
@@ -13,12 +19,14 @@ const K = 45.17; // constante 16:9 validada contra ficha del fabricante
 export function Ficha({
   p,
   objeciones,
+  configFinanciamiento,
   onBack,
   onObj,
   onDemo,
 }: {
   p: Producto;
   objeciones: Objecion[];
+  configFinanciamiento: ConfigFinanciamiento;
   onBack: () => void;
   onObj: (o: Objecion) => void;
   onDemo: () => void;
@@ -26,6 +34,14 @@ export function Ficha({
   const [dist, setDist] = useState(2.5);
   const [size, setSize] = useState(100);
   const [showEfe, setShowEfe] = useState(false);
+  // La ficha técnica arranca cerrada: la tablet está pensada para que precio,
+  // bullets y objeciones quepan sin scroll. Se abre cuando el cliente pregunta
+  // un dato concreto ("¿se puede bañar con él?", "¿cuánto dura la batería?").
+  const [showSpecs, setShowSpecs] = useState(false);
+
+  // Etiquetas, orden y formato salen del catálogo compartido con el POS y la web.
+  const filasSpecs = filasDeSpecs(p.categorySlug, p.specs);
+  const esProyector = resolverCategoriaSpec(p.categorySlug) === "proyector";
 
   const foto = p.media?.heroImage ?? p.media?.gallery?.[0]?.url ?? p.media?.fotos?.[0];
   const tr = toNum(p.specs?.throwRatio);
@@ -38,6 +54,16 @@ export function Ficha({
   const act = p.precio?.actual ?? null; // null = precio no cargado → "Consultar"
   const efe = p.precio?.efectivo ?? 0;
   const hasDisc = (p.precio?.descEfectivoPct ?? 0) > 0 && efe > 0;
+
+  // Cuotas: mismo módulo que usa la web, así el asesor y el cliente ven el
+  // mismo número. El recargo sale de la categoría del producto (o de su
+  // override), no de una constante local.
+  const planes = calcularPlanes(act, USD_TO_NIO, {
+    config: configFinanciamiento,
+    categoria: p.categorySlug,
+    override: p.financiamientoOverride,
+  });
+  const sinInteresTotal = todosSinInteres(planes);
 
   return (
     <div>
@@ -157,34 +183,75 @@ export function Ficha({
               </div>
             )}
 
-            {/* Financiamiento 0% — solo si precio con tarjeta >= umbral */}
-            {act != null && act >= FINANCIAMIENTO_MIN_USD && (
+            {/* Financiamiento a plazos. El recargo lo define la categoría (o el
+                override del producto) en Configuración del POS. El asesor ve la
+                cuota Y el total a cobrar, para poder decirle al cliente cuánto
+                termina pagando sin tener que calcularlo de memoria. */}
+            {planes.length > 0 && (
               <div className="mt-3 border border-dashed border-stone-300 dark:border-zinc-600 rounded-xl p-4">
                 <div className="flex items-center gap-2.5 mb-3">
                   <img src="/banpro.svg" alt="Banpro" style={{ height: 35 }} className="opacity-90 shrink-0" />
                   <p className="text-xs font-bold uppercase tracking-wide text-stone-400 dark:text-zinc-500">
-                    Financiamiento sin intereses
+                    {sinInteresTotal ? "Financiamiento sin intereses" : "Pago a plazos"}
                   </p>
+                  {sinInteresTotal && (
+                    <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/40">
+                      0% interés
+                    </span>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  {FINANCIAMIENTO_PLAZOS.map((meses) => {
-                    const cuotaNio = (act * USD_TO_NIO) / meses;
-                    return (
+                  {planes.map((plan) => (
+                    <div
+                      key={plan.meses}
+                      className={`rounded-xl px-4 py-3.5 text-center border ${
+                        plan.sinInteres
+                          ? "bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border-emerald-200 dark:border-emerald-700/40"
+                          : "bg-slate-50 dark:bg-zinc-700/40 border-slate-200 dark:border-zinc-600"
+                      }`}
+                    >
                       <div
-                        key={meses}
-                        className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-700/40 rounded-xl px-4 py-4 text-center"
+                        className={`text-sm font-semibold mb-1 ${
+                          plan.sinInteres
+                            ? "text-emerald-700 dark:text-emerald-400"
+                            : "text-slate-600 dark:text-zinc-300"
+                        }`}
                       >
-                        <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-400 mb-1">
-                          {meses} cuotas
-                        </div>
-                        <div className="text-2xl font-extrabold text-zinc-800 dark:text-zinc-100 leading-tight">
-                          C${Math.round(cuotaNio).toLocaleString("es-NI")}
-                        </div>
-                        <div className="text-xs text-stone-400 dark:text-zinc-500 mt-1">/ mes · 0% interés</div>
+                        {plan.meses} cuotas
                       </div>
-                    );
-                  })}
+                      <div className="text-2xl font-extrabold text-zinc-800 dark:text-zinc-100 leading-tight">
+                        C${plan.cuotaNio.toLocaleString("es-NI")}
+                      </div>
+                      <div className="text-xs text-stone-400 dark:text-zinc-500 mt-0.5">al mes</div>
+
+                      {/* El número que el asesor necesita para responder
+                          "¿y cuánto pago en total?" sin sacar la calculadora. */}
+                      <div className="mt-2 pt-2 border-t border-dashed border-stone-300 dark:border-zinc-600">
+                        <div className="text-[11px] text-stone-500 dark:text-zinc-400">
+                          Total a cobrar
+                        </div>
+                        <div className="text-sm font-bold text-zinc-700 dark:text-zinc-200">
+                          C${plan.totalNio.toLocaleString("es-NI")}
+                        </div>
+                        {plan.sinInteres ? (
+                          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+                            0% interés
+                          </div>
+                        ) : (
+                          <div className="text-[11px] text-amber-700 dark:text-amber-400 mt-0.5">
+                            +C${plan.sobrePrecioNio.toLocaleString("es-NI")} sobre contado
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
+                {!sinInteresTotal && (
+                  <p className="text-[11px] text-stone-500 dark:text-zinc-400 mt-3">
+                    De contado sale <b>{cordobas(act)}</b>. A plazos el monto es mayor — decilo de
+                    frente, es lo que el banco le va a cobrar.
+                  </p>
+                )}
               </div>
             )}
             </>
@@ -216,8 +283,40 @@ export function Ficha({
             )}
           </div>
 
+          {/* Ficha técnica — colapsada; los datos los carga el POS por categoría */}
+          {filasSpecs.length > 0 && (
+            <div>
+              <button
+                onClick={() => setShowSpecs((v) => !v)}
+                className="w-full flex items-center justify-between gap-2 bg-white dark:bg-zinc-800 border border-stone-200 dark:border-zinc-700 rounded-xl px-4 py-3 hover:bg-stone-50 dark:hover:bg-zinc-700/60 transition-colors"
+              >
+                <span className="flex items-center gap-2 text-sm font-semibold text-stone-600 dark:text-zinc-300">
+                  <ListChecks size={16} className="text-cyan-500" />
+                  Ficha técnica
+                  <span className="text-xs font-normal text-stone-400 dark:text-zinc-500">
+                    ({filasSpecs.length} datos)
+                  </span>
+                </span>
+                <ChevronDown
+                  size={16}
+                  className={`text-stone-400 transition-transform ${showSpecs ? "rotate-180" : ""}`}
+                />
+              </button>
+              {showSpecs && (
+                <dl className="mt-2 overflow-y-auto max-h-[240px] divide-y divide-stone-200 dark:divide-zinc-700 rounded-xl border border-stone-200 dark:border-zinc-700 bg-white dark:bg-zinc-800">
+                  {filasSpecs.map((f) => (
+                    <div key={f.key} className="grid grid-cols-2 gap-3 px-4 py-2.5 text-sm">
+                      <dt className="text-stone-500 dark:text-zinc-400">{f.label}</dt>
+                      <dd className="font-medium text-stone-800 dark:text-zinc-100">{f.valor}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </div>
+          )}
+
           {/* Calculadora — solo proyectores */}
-          {p.categorySlug?.toLowerCase() === "projector" && (
+          {esProyector && (
           <div>
           <p className="text-xs uppercase tracking-wide text-stone-400 dark:text-zinc-500 font-bold mb-2">
             Calculadora de distancia

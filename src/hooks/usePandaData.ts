@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
-import { collection, onSnapshot } from "@firebase/firestore";
+import { collection, doc, onSnapshot } from "@firebase/firestore";
 import { db, ensureAnonAuth } from "../lib/firebase";
 import type { Objecion, Producto } from "../types";
+import {
+  CONFIG_FINANCIAMIENTO_DEFAULT,
+  normalizarConfig,
+  type ConfigFinanciamiento,
+} from "../lib/financiamiento";
 
 export interface PandaData {
   catalogo: Producto[];
   universales: Objecion[];
   porCategoria: Objecion[];
+  /** Reglas de financiamiento vigentes (doc `config/financiamiento` del POS). */
+  configFinanciamiento: ConfigFinanciamiento;
   loading: boolean;
   error: string | null;
 }
@@ -169,6 +176,9 @@ export function usePandaData(): PandaData {
   const [catalogo, setCatalogo] = useState<Producto[]>([]);
   const [universales, setUniversales] = useState<Objecion[]>([]);
   const [porCategoria, setPorCategoria] = useState<Objecion[]>([]);
+  const [configFinanciamiento, setConfigFinanciamiento] = useState<ConfigFinanciamiento>(
+    CONFIG_FINANCIAMIENTO_DEFAULT,
+  );
   const [catReady, setCatReady] = useState(false);
   const [uniReady, setUniReady] = useState(false);
   const [catObjReady, setCatObjReady] = useState(false);
@@ -179,6 +189,7 @@ export function usePandaData(): PandaData {
     let unsubCat: () => void = () => {};
     let unsubUni: () => void = () => {};
     let unsubCatObj: () => void = () => {};
+    let unsubConfig: () => void = () => {};
 
     ensureAnonAuth()
       .then(() => {
@@ -231,6 +242,18 @@ export function usePandaData(): PandaData {
           },
           (e) => { console.warn("objeciones_categoria:", e); setCatObjReady(true); },
         );
+
+        // Reglas de financiamiento. Si falla, se usa el default del módulo
+        // compartido: nunca deja al asesor sin cuotas que mostrar. NO bloquea
+        // la app (no entra en `loading`), porque el catálogo ya es suficiente
+        // para vender y la cuota aparece en cuanto llega el doc.
+        unsubConfig = onSnapshot(
+          doc(db, "config", "financiamiento"),
+          (snap) => {
+            if (snap.exists()) setConfigFinanciamiento(normalizarConfig(snap.data()));
+          },
+          (e) => { console.warn("config/financiamiento:", e); },
+        );
       })
       .catch((e) => {
         setError(traducirError(e));
@@ -244,6 +267,7 @@ export function usePandaData(): PandaData {
       unsubCat();
       unsubUni();
       unsubCatObj();
+      unsubConfig();
     };
   }, []);
 
@@ -251,6 +275,7 @@ export function usePandaData(): PandaData {
     catalogo,
     universales,
     porCategoria,
+    configFinanciamiento,
     loading: !(catReady && uniReady && catObjReady),
     error,
   };

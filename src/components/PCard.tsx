@@ -1,15 +1,34 @@
 import type { Producto } from "../types";
 import { cordobas } from "../lib/format";
-import { FINANCIAMIENTO_MIN_USD, FINANCIAMIENTO_PLAZOS, USD_TO_NIO } from "../config";
+import { USD_TO_NIO } from "../config";
+import {
+  calcularPlanes,
+  planMasBajo,
+  todosSinInteres,
+  type ConfigFinanciamiento,
+} from "../lib/financiamiento";
 
-export function PCard({ p, onClick }: { p: Producto; onClick: () => void }) {
+export function PCard({
+  p,
+  configFinanciamiento,
+  onClick,
+}: {
+  p: Producto;
+  configFinanciamiento: ConfigFinanciamiento;
+  onClick: () => void;
+}) {
   const foto = p.media?.heroImage ?? p.media?.gallery?.[0]?.url ?? p.media?.fotos?.[0];
   const agotado = !p.disponible;
   const act = p.precio?.actual ?? null;
-  const aplicaCuotas = act != null && act >= FINANCIAMIENTO_MIN_USD;
-  const cuotaMin = aplicaCuotas
-    ? Math.round((act! * USD_TO_NIO) / Math.max(...FINANCIAMIENTO_PLAZOS))
-    : null;
+  // El "0%" ya no es parejo: se muestra solo si este producto de verdad no
+  // lleva recargo en ningún plazo.
+  const planes = calcularPlanes(act, USD_TO_NIO, {
+    config: configFinanciamiento,
+    categoria: p.categorySlug,
+    override: p.financiamientoOverride,
+  });
+  const cuotaMin = planMasBajo(planes);
+  const sinInteres = todosSinInteres(planes);
   return (
     <button
       onClick={onClick}
@@ -42,9 +61,10 @@ export function PCard({ p, onClick }: { p: Producto; onClick: () => void }) {
           <span className="text-stone-400 dark:text-zinc-500 font-normal text-xs">Sin precio</span>
         )}
       </div>
-      {aplicaCuotas && (
+      {cuotaMin && (
         <div className="mt-0.5 text-[11px] text-stone-400 dark:text-zinc-500">
-          desde C${cuotaMin!.toLocaleString("es-NI")} / mes · 0%
+          desde C${cuotaMin.cuotaNio.toLocaleString("es-NI")} / mes
+          {sinInteres && <span className="text-emerald-600 dark:text-emerald-400"> · 0%</span>}
         </div>
       )}
       <div className="mt-1.5 flex items-center gap-2">
